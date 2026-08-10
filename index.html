@@ -1,98 +1,615 @@
 <!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TempusMate QA & Release Readiness</title><link rel="stylesheet" href="styles.css"></head>
-<body><header><div class="header"><div class="brand"><h1>🧪 TempusMate QA & Release Readiness</h1><p id="updated"></p></div><nav id="nav"><button data-tab="executive" class="active">Executivo</button><button data-tab="history">Histórico</button><button data-tab="run">Último E2E</button><button data-tab="rules">Regras</button><button data-tab="next">Próximos</button></nav></div></header>
-<main><section id="executive" class="tab active"></section><section id="history" class="tab"></section><section id="run" class="tab"></section><section id="rules" class="tab"></section><section id="next" class="tab"></section></main>
-<footer>Dashboard estático versionado. Fonte única: <code>qa-data.js</code>.</footer><script src="qa-data.js"></script>
-<script>
-const d = window.QA_DATA;
-const $ = id => document.getElementById(id);
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const cls = s => String(s).toLowerCase().replace(/\s+/g,'-');
-const badge = s => `<span class="badge ${cls(s)}">${esc(s)}</span>`;
-const items = d.masterItems;
-const bugs = items.filter(x => x.type === 'BUG');
-const resolvedBugs = bugs.filter(x => x.status === 'resolved').length;
-const openBugs = bugs.filter(x => x.status !== 'resolved').length;
-const fixedLike = items.filter(x => ['resolved','implemented'].includes(x.status)).length;
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TempusMate QA & Release Readiness</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <div class="header">
+    <div class="brand">
+      <h1>🧪 TempusMate QA & Release Readiness</h1>
+      <p>Atualizado em 2026-08-09 • E2E in progress</p>
+    </div>
+    <nav>
+      <a href="#executivo">Executivo</a>
+      <a href="#historico">Histórico</a>
+      <a href="#e2e">Último E2E</a>
+      <a href="#regras">Regras</a>
+      <a href="#proximos">Próximos</a>
+    </nav>
+  </div>
+</header>
 
-$('updated').textContent = `Atualizado em ${d.meta.updatedAt} • ${d.meta.releaseStatus}`;
+<main>
+<section id="executivo">
+  <div class="hero">
+    <div class="card heroMain">
+      <h2>Core Employee Invoice flow validated through Save → Edit with complex overtime/rate scenarios.</h2>
+      <p>A versão ainda está em estabilização ativa. Vários bugs de integridade financeira e identidade foram encontrados e corrigidos antes de liberar uma nova build para teste externo.</p>
+    </div>
+    <div class="card release">
+      <span class="small">Release readiness</span>
+      <strong>E2E in progress</strong>
+      <span class="badge warning">warning</span>
+      <p class="small">PASS through Save/Edit • Clean build</p>
+    </div>
+  </div>
 
-$('nav').addEventListener('click', e => {
-  const b = e.target.closest('button[data-tab]');
-  if (!b) return;
-  document.querySelectorAll('#nav button').forEach(x => x.classList.toggle('active', x === b));
-  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.id === b.dataset.tab));
-});
+  <div class="metrics">
+    <div class="card metric"><span>Confirmed bugs</span><strong>18</strong></div>
+    <div class="card metric"><span>Resolved bugs</span><strong>17</strong></div>
+    <div class="card metric"><span>Open / verify</span><strong>1</strong></div>
+    <div class="card metric"><span>Automated tests</span><strong>448</strong></div>
+    <div class="card metric"><span>Automated failures</span><strong>0</strong></div>
+  </div>
 
-$('executive').innerHTML = `
-<div class="hero">
-  <div class="card heroMain"><h2>${esc(d.meta.headline)}</h2><p>${esc(d.executive.poMessage)}</p></div>
-  <div class="card release"><span class="small">Release readiness</span><strong>${esc(d.meta.releaseStatus)}</strong>${badge('warning')}<p class="small">${esc(d.executive.manualRunStatus)} • ${esc(d.executive.latestBuild)} build</p></div>
-</div>
-<div class="metrics">
-  <div class="card metric"><span>Confirmed bugs</span><strong>${bugs.length}</strong></div>
-  <div class="card metric"><span>Resolved bugs</span><strong>${resolvedBugs}</strong></div>
-  <div class="card metric"><span>Open / verify</span><strong>${openBugs}</strong></div>
-  <div class="card metric"><span>Automated tests</span><strong>${d.executive.automatedTests}</strong></div>
-  <div class="card metric"><span>Automated failures</span><strong>${d.executive.automatedFailures}</strong></div>
-</div>
-<div class="kpiStrip">
-  <div class="card progress"><h3>Último E2E</h3><div class="small">${esc(d.latestRun.title)}</div><strong style="display:block;font-size:1.6rem;margin:8px 0">${esc(d.latestRun.final.amount)}</strong><div class="small">${esc(d.latestRun.final.hours)} • ${esc(d.latestRun.status)}</div></div>
-  <div class="card callout"><strong>Validação ainda restante</strong>${d.meta.remainingValidation.map(x=>`<div>• ${esc(x)}</div>`).join('')}</div>
-</div>
-<div class="sectionHead"><h2>Distribuição do trabalho de estabilização</h2></div>
-<div class="metrics">
-  ${['BUG','FEATURE / GAP','TECH DEBT','PRODUCT DECISION'].map(t=>`<div class="card metric"><span>${esc(t)}</span><strong>${items.filter(x=>x.type===t).length}</strong></div>`).join('')}
-  <div class="card metric"><span>Resolved / implemented items</span><strong>${fixedLike}</strong></div>
-</div>`;
+  <div class="kpiStrip">
+    <div class="card progress">
+      <h3>Último E2E</h3>
+      <div class="small">Employee Invoice Crazy E2E</div>
+      <strong class="big">£1,690.00</strong>
+      <div class="small">34h30 • PASS through Save/Edit</div>
+    </div>
+    <div class="card callout">
+      <strong>Validação ainda restante</strong>
+      <div>• Invoice Preview / PDF parity</div><div>• Expense module and Expense ↔ Invoice integration</div><div>• Quote/Service follow-up scenarios</div><div>• Cross-midnight and long-break edge cases</div>
+    </div>
+  </div>
 
-function renderHistory() {
-  const types = [...new Set(items.map(x => x.type))];
-  const areas = [...new Set(items.map(x => x.area))].sort();
-  const statuses = [...new Set(items.map(x => x.status))];
-  $('history').innerHTML = `
-    <div class="sectionHead"><h2>Master stabilization history</h2><div class="toolbar">
-      <input id="q" type="search" placeholder="Buscar...">
-      <select id="typeFilter"><option value="">Todos tipos</option>${types.map(x=>`<option>${esc(x)}</option>`).join('')}</select>
-      <select id="statusFilter"><option value="">Todos status</option>${statuses.map(x=>`<option>${esc(x)}</option>`).join('')}</select>
-      <select id="areaFilter"><option value="">Todas áreas</option>${areas.map(x=>`<option>${esc(x)}</option>`).join('')}</select>
+  <div class="sectionHead"><h2>Distribuição do trabalho de estabilização</h2></div>
+  <div class="metrics">
+    <div class="card metric"><span>BUG</span><strong>18</strong></div><div class="card metric"><span>FEATURE / GAP</span><strong>7</strong></div><div class="card metric"><span>TECH DEBT</span><strong>5</strong></div><div class="card metric"><span>PRODUCT DECISION</span><strong>1</strong></div>
+    <div class="card metric"><span>Resolved / implemented items</span><strong>22</strong></div>
+  </div>
+</section>
+
+<section id="historico">
+  <div class="sectionHead"><h2>Master stabilization history</h2><span class="small">Sem JavaScript: conteúdo sempre visível no GitHub Pages.</span></div>
+  <div class="list">
+    <article class="card row">
+      <div>
+        <div class="meta">BUG-001</div>
+        <span class="badge high">HIGH</span>
+        <div class="spacer"><span class="badge bug">BUG</span></div>
+      </div>
+      <div>
+        <h3>Troca/reseleção de cliente reprecificava rows existentes</h3>
+        <div class="meta">Invoice / Client</div>
+        <p>Existing/imported employee rows recebiam novamente rate, overtime e regras do Client Profile, destruindo snapshots históricos.</p>
+        <p><strong>Resolution / state:</strong> Rows existentes passaram a ser snapshots protegidos; defaults do cliente só semeiam novas rows.</p>
+      </div>
+      <div><span class="badge resolved">resolved</span></div>
+    </article>
+    <article class="card row">
+      <div>
+        <div class="meta">BUG-002</div>
+        <span class="badge high">HIGH</span>
+        <div class="spacer"><span class="badge bug">BUG</span></div>
+      </div>
+      <div>
+        <h3>Import Shifts sem consciência do cliente da Invoice</h3>
+        <div class="meta">Invoice / Import</div>
+        <p>O seletor podia listar turnos de outros clientes.</p>
+        <p><strong>Resolution / state:</strong> Predicate de elegibilidade passou a respeitar profileId, nome manual exato e shifts realmente sem cliente.</p>
+      </div>
+      <div><span class="badge resolved">resolved</span></div>
+    </article>
+    <article class="card row">
+      <div>
+        <div class="meta">BUG-003</div>
+        <span class="badge medium">MEDIUM</span>
+        <div class="spacer"><span class="badge bug">BUG</span></div>
+      </div>
+      <div>
+        <h3>Invoice manual &#x27;Itau&#x27; não via shift do Profile Itau</h3>
+        <div class="meta">Invoice / Identity</div>
+        <p>Nome manual equivalente ao Profile era excluído do filtro.</p>
+        <p><strong>Resolution / state:</strong> Match exato de nome é aceito somente para elegibilidade; não cria Profile identity.</p>
+      </div>
+      <div><span class="badge resolved">resolved</span></div>
+    </article>
+    <article class="card row">
+      <div>
+        <div class="meta">BUG-004</div>
+        <span class="badge high">HIGH</span>
+        <div class="spacer"><span class="badge bug">BUG</span></div>
+      </div>
+      <div>
+        <h3>Profile selecionado + texto editado criava identidade híbrida</h3>
+        <div class="meta">Invoice / Identity</div>
+        <p>Selecionar Santander e editar o texto para Itau misturava resultados.</p>
+        <p><strong>Resolution / state:</strong> Com profileId presente, Profile é a única autoridade de elegibilidade.</p>
+      </div>
+      <div><span class="badge resolved">resolved</span></div>
+    </article>
+    <article class="card row">
+      <div>
+        <div class="meta">BUG-005</div>
+        <span class="badge high">HIGH</span>
+        <div class="spacer"><span class="badge bug">BUG</span></div>
+      </div>
+      <div>
+        <h3>Era possível trocar cliente com shifts já preenchidos</h3>
+        <div class="meta">Invoice / Client</div>
+        <p>Permitiria misturar ITAU + Santander na mesma Invoice.</p>
+        <p><strong>Resolution / state:</strong> Troca é bloqueada quando existem employee rows protegidas.</p>
+      </div>
+      <div><span class="badge resolved">resolved</span></div>
+    </article>
+    <article class="card row">
+      <div>
+        <div class="meta">BUG-006</div>
+        <span class="badge high">HIGH</span>
+        <div class="spacer"><span class="badge bug">BUG</span></div>
+      </div>
+      <div>
+        <h3>Nova row manual não recebia hourlyRate do cliente</h3>
+        <div class="meta">Invoice / Add Shift</div>
+        <p>O caller de + Add Shift omitía effectiveHourlyRate.</p>
+        <p><strong>Resolution / state:</strong> Rate efetivo passou a ser encaminhado; estado é resetado/rederivado ao abrir/editar.</p>
+      </div>
+      <div><span class="badge resolved">resolved</span></div>
+    </article>
+    <article class="card row">
+      <div>
+        <div class="meta">BUG-007</div>
+        <span class="badge high">HIGH</span>
+        <div class="spacer"><span class="badge bug">BUG</span></div>
+      </div>
+      <div>
+        <h3>Delete Shift confirmava mas não apagava</h3>
+        <div class="meta">Calendar / Shift</div>
+        <p>deleteShiftFromHistory chamava saveState() inexistente e abortava antes da persistência/render.</p>
+        <p><strong>Resolution / state:</strong> Passou a usar saveHistoryToLocalStorage().</p>
+      </div>
+      <div><span class="badge resolved">resolved</span></div>
+    </article>
+    <article class="card row">
+      <div>
+        <div class="meta">BUG-008</div>
+        <span class="badge medium">MEDIUM</span>
+        <div class="spacer"><span class="badge bug">BUG</span></div>
+      </div>
+      <div>
+        <h3>Starter row vazia não recebia defaults do Client</h3>
+        <div class="meta">Invoice / Starter Row</div>
+        <p>A row inicial existia antes da seleção do cliente e ficou sem rate/OT/regras após snapshot protection.</p>
+        <p><strong>Resolution / state:</strong> A única starter row realmente vazia é resemeada com os mesmos defaults de + Add Shift Row.</p>
+      </div>
+      <div><span class="badge resolved">resolved</span></div>
+    </article>
+    <article class="card row">
+      <div>
+        <div class="meta">BUG-009</div>
+        <span class="badge medium">MEDIUM</span>
+        <div class="spacer"><span class="badge bug">BUG</span></div>
+      </div>
+      <div>
+        <h3>Horas decimais exibidas como duração</h3>
+        <div class="meta">UI / Duration</div>
+        <p>Ex.: 2.50h era exibido diretamente em várias superfícies.</p>
+        <p><strong>Resolution / state:</strong> UI passou a usar formatHoursMinutes(); matemática/storage continuam em decimal.</p>
+      </div>
+      <div><span class="badge resolved">resolved</span></div>
+    </article>
+    <article class="card row">
+      <div>
+        <div class="meta">BUG-010</div>
+        <span class="badge high">HIGH</span>
+        <div class="spacer"><span class="badge bug">BUG</span></div>
+      </div>
+      <div>
+        <h3>Mesmo Shift podia ser importado várias vezes na mesma Invoice</h3>
+        <div class="meta">Invoice / Import</div>
+        <p>Reabrir Generate from Shifts mostrava novamente shifts já importados.</p>
+        <p><strong>Resolution / state:</strong> sourceShiftId é persistido por row/Invoice e o selector exclui apenas IDs já presentes na Invoice ativa.</p>
+      </div>
+      <div><span class="badge resolved">resolved</span></div>
+    </article>
+    <article class="card row">
+      <div>
+        <div class="meta">BUG-011</div>
+        <span class="badge high">HIGH</span>
+        <div class="spacer"><span class="badge bug">BUG</span></div>
+      </div>
+      <div>
+        <h3>Detach de Client Profile deixava campos antigos na Quote</h3>
+        <div class="meta">Quote / Client</div>
+        <p>Ao remover o profile, apenas o badge era limpo; dados derivados permaneciam.</p>
+        <p><strong>Resolution / state:</strong> Blank branch passou a limpar os 5 campos derivados.</p>
+      </div>
+      <div><span class="badge resolved">resolved</span></div>
+    </article>
+    <article class="card row">
+      <div>
+        <div class="meta">BUG-012</div>
+        <span class="badge high">HIGH</span>
+        <div class="spacer"><span class="badge bug">BUG</span></div>
+      </div>
+      <div>
+        <h3>Quote fazia relink por nome ao editar</h3>
+        <div class="meta">Quote / Identity</div>
+        <p>loadQuoteIntoForm usava comparação de nome e podia associar perfil errado.</p>
+        <p><strong>Resolution / state:</strong> Restore do dropdown passou a usar profileId exclusivamente.</p>
+      </div>
+      <div><span class="badge resolved">resolved</span></div>
+    </article>
+    <article class="card row">
+      <div>
+        <div class="meta">BUG-013</div>
+        <span class="badge high">HIGH</span>
+        <div class="spacer"><span class="badge bug">BUG</span></div>
+      </div>
+      <div>
+        <h3>Quote não persistia profileId</h3>
+        <div class="meta">Quote / Identity</div>
+        <p>Não havia como distinguir entrada manual de cliente derivado de Profile.</p>
+        <p><strong>Resolution / state:</strong> Quote passou a persistir profileId e snapshot de identidade.</p>
+      </div>
+      <div><span class="badge resolved">resolved</span></div>
+    </article>
+    <article class="card row">
+      <div>
+        <div class="meta">BUG-014</div>
+        <span class="badge medium">MEDIUM</span>
+        <div class="spacer"><span class="badge bug">BUG</span></div>
+      </div>
+      <div>
+        <h3>Quote lia contactPerson em vez de contact do Profile</h3>
+        <div class="meta">Quote / Client</div>
+        <p>Contact Person ficava vazio ao carregar Client Profile.</p>
+        <p><strong>Resolution / state:</strong> Boundary Profile → Quote usa client.contact; snapshot Quote continua contactPerson.</p>
+      </div>
+      <div><span class="badge resolved">resolved</span></div>
+    </article>
+    <article class="card row">
+      <div>
+        <div class="meta">BUG-015</div>
+        <span class="badge high">HIGH</span>
+        <div class="spacer"><span class="badge bug">BUG</span></div>
+      </div>
+      <div>
+        <h3>Conversão não preservava identidade do cliente</h3>
+        <div class="meta">Quote → Invoice</div>
+        <p>Invoice convertida perdia vínculo explícito do Profile depois que name fallback foi removido.</p>
+        <p><strong>Resolution / state:</strong> Quote → Invoice carrega profileId do snapshot.</p>
+      </div>
+      <div><span class="badge resolved">resolved</span></div>
+    </article>
+    <article class="card row">
+      <div>
+        <div class="meta">BUG-016</div>
+        <span class="badge high">HIGH</span>
+        <div class="spacer"><span class="badge bug">BUG</span></div>
+      </div>
+      <div>
+        <h3>B2B/VAT/country não existiam no snapshot da Quote</h3>
+        <div class="meta">Quote → Invoice</div>
+        <p>Invoice convertida podia declarar Profile mas carregar defaults B2C/GB/vazio inconsistentes.</p>
+        <p><strong>Resolution / state:</strong> Quote captura isBusiness/vatNumber/country no Save e conversão usa apenas snapshot.</p>
+      </div>
+      <div><span class="badge resolved">resolved</span></div>
+    </article>
+    <article class="card row">
+      <div>
+        <div class="meta">BUG-017</div>
+        <span class="badge high">HIGH</span>
+        <div class="spacer"><span class="badge bug">BUG</span></div>
+      </div>
+      <div>
+        <h3>toggleInvoicePaid podia deixar calcFees desatualizado</h3>
+        <div class="meta">Invoice / Totals</div>
+        <p>Finding histórico identificado durante auditoria anterior: mudar Paid podia congelar total calculado incorretamente.</p>
+        <p><strong>Resolution / state:</strong> Mantido no histórico como finding prévio; confirmar status atual antes de marcar como fechado.</p>
+      </div>
+      <div><span class="badge known">known</span></div>
+    </article>
+    <article class="card row">
+      <div>
+        <div class="meta">BUG-018</div>
+        <span class="badge high">HIGH</span>
+        <div class="spacer"><span class="badge bug">BUG</span></div>
+      </div>
+      <div>
+        <h3>Troca de cliente não recalculava corretamente configuração de overtime</h3>
+        <div class="meta">Invoice / Overtime</div>
+        <p>Gap original do ciclo de estabilização; depois evoluiu para política de snapshot e defaults por cliente.</p>
+        <p><strong>Resolution / state:</strong> Regra consolidada: existentes preservam snapshot; novas rows recebem defaults do cliente atual.</p>
+      </div>
+      <div><span class="badge resolved">resolved</span></div>
+    </article>
+    <article class="card row">
+      <div>
+        <div class="meta">GAP-001</div>
+        <span class="badge medium">MEDIUM</span>
+        <div class="spacer"><span class="badge feature---gap">FEATURE / GAP</span></div>
+      </div>
+      <div>
+        <h3>Recibos no PDF</h3>
+        <div class="meta">PDF</div>
+        <p>Item original de estabilização: comprovantes/recibos não apareciam no PDF.</p>
+        <p><strong>Resolution / state:</strong> Pendência histórica / validar implementação atual.</p>
+      </div>
+      <div><span class="badge planned">planned</span></div>
+    </article>
+    <article class="card row">
+      <div>
+        <div class="meta">GAP-002</div>
+        <span class="badge medium">MEDIUM</span>
+        <div class="spacer"><span class="badge feature---gap">FEATURE / GAP</span></div>
+      </div>
+      <div>
+        <h3>Descrição financeira de extras no PDF</h3>
+        <div class="meta">PDF</div>
+        <p>Item original de estabilização: descrição de extras precisava aparecer no PDF.</p>
+        <p><strong>Resolution / state:</strong> Validar no bloco Preview/PDF.</p>
+      </div>
+      <div><span class="badge planned">planned</span></div>
+    </article>
+    <article class="card row">
+      <div>
+        <div class="meta">GAP-003</div>
+        <span class="badge medium">MEDIUM</span>
+        <div class="spacer"><span class="badge feature---gap">FEATURE / GAP</span></div>
+      </div>
+      <div>
+        <h3>Hourly rate por cliente</h3>
+        <div class="meta">Client Profile</div>
+        <p>Cliente pode definir rate padrão para novas employee rows.</p>
+        <p><strong>Resolution / state:</strong> Implementado e validado no E2E atual.</p>
+      </div>
+      <div><span class="badge implemented">implemented</span></div>
+    </article>
+    <article class="card row">
+      <div>
+        <div class="meta">GAP-004</div>
+        <span class="badge low">LOW</span>
+        <div class="spacer"><span class="badge feature---gap">FEATURE / GAP</span></div>
+      </div>
+      <div>
+        <h3>Remover overrides fixos 1.5x/2x/3x</h3>
+        <div class="meta">Overtime</div>
+        <p>Simplificação para usar regras configuradas em vez de overrides soltos.</p>
+        <p><strong>Resolution / state:</strong> Integrado ao fluxo atual de regras.</p>
+      </div>
+      <div><span class="badge implemented">implemented</span></div>
+    </article>
+    <article class="card row">
+      <div>
+        <div class="meta">GAP-005</div>
+        <span class="badge low">LOW</span>
+        <div class="spacer"><span class="badge feature---gap">FEATURE / GAP</span></div>
+      </div>
+      <div>
+        <h3>Live breakdown</h3>
+        <div class="meta">Invoice UI</div>
+        <p>Necessidade de breakdown ao vivo durante edição de Invoice.</p>
+        <p><strong>Resolution / state:</strong> Presente no fluxo atual; ainda precisa cobertura runtime mais forte.</p>
+      </div>
+      <div><span class="badge implemented">implemented</span></div>
+    </article>
+    <article class="card row">
+      <div>
+        <div class="meta">GAP-006</div>
+        <span class="badge low">LOW</span>
+        <div class="spacer"><span class="badge feature---gap">FEATURE / GAP</span></div>
+      </div>
+      <div>
+        <h3>Load Profile / dados do usuário</h3>
+        <div class="meta">Profile</div>
+        <p>Fluxo de carregar dados do próprio usuário no formulário.</p>
+        <p><strong>Resolution / state:</strong> Implementado anteriormente.</p>
+      </div>
+      <div><span class="badge implemented">implemented</span></div>
+    </article>
+    <article class="card row">
+      <div>
+        <div class="meta">GAP-007</div>
+        <span class="badge low">LOW</span>
+        <div class="spacer"><span class="badge feature---gap">FEATURE / GAP</span></div>
+      </div>
+      <div>
+        <h3>Redesign lista + modal</h3>
+        <div class="meta">Invoice UI</div>
+        <p>Reorganização de UX de Invoice/rows.</p>
+        <p><strong>Resolution / state:</strong> Implementado em etapas; Home experiment foi mantido minimalista.</p>
+      </div>
+      <div><span class="badge implemented">implemented</span></div>
+    </article>
+    <article class="card row">
+      <div>
+        <div class="meta">DEBT-001</div>
+        <span class="badge medium">MEDIUM</span>
+        <div class="spacer"><span class="badge tech-debt">TECH DEBT</span></div>
+      </div>
+      <div>
+        <h3>rules: [] pode cair em State.defaultRules live</h3>
+        <div class="meta">Overtime</div>
+        <p>Registro histórico sem regras explícitas ainda pode resolver defaults atuais.</p>
+        <p><strong>Resolution / state:</strong> Documentado como follow-up separado.</p>
+      </div>
+      <div><span class="badge deferred">deferred</span></div>
+    </article>
+    <article class="card row">
+      <div>
+        <div class="meta">DEBT-002</div>
+        <span class="badge high">HIGH</span>
+        <div class="spacer"><span class="badge tech-debt">TECH DEBT</span></div>
+      </div>
+      <div>
+        <h3>Testes regex/source-level demais</h3>
+        <div class="meta">Tests</div>
+        <p>Alguns testes verificam strings/código-fonte em vez de executar DOM/runtime real.</p>
+        <p><strong>Resolution / state:</strong> Manter como guarda temporária; aumentar JSDOM/E2E gradualmente.</p>
+      </div>
+      <div><span class="badge deferred">deferred</span></div>
+    </article>
+    <article class="card row">
+      <div>
+        <div class="meta">DEBT-003</div>
+        <span class="badge medium">MEDIUM</span>
+        <div class="spacer"><span class="badge tech-debt">TECH DEBT</span></div>
+      </div>
+      <div>
+        <h3>Premissas antigas sobre clientId de Invoice</h3>
+        <div class="meta">Expenses</div>
+        <p>Expense ainda contém lógica/comentários anteriores ao invoice.client.profileId.</p>
+        <p><strong>Resolution / state:</strong> Auditar quando entrar no bloco Expenses.</p>
+      </div>
+      <div><span class="badge follow-up">follow-up</span></div>
+    </article>
+    <article class="card row">
+      <div>
+        <div class="meta">DEBT-004</div>
+        <span class="badge medium">MEDIUM</span>
+        <div class="spacer"><span class="badge tech-debt">TECH DEBT</span></div>
+      </div>
+      <div>
+        <h3>Edit de evento legado pode perder clientName</h3>
+        <div class="meta">Agenda</div>
+        <p>Fallback por nome é read-only e seguro, mas edição de legado sem clientId pode apagar nome antigo.</p>
+        <p><strong>Resolution / state:</strong> Investigar no bloco Agenda.</p>
+      </div>
+      <div><span class="badge follow-up">follow-up</span></div>
+    </article>
+    <article class="card row">
+      <div>
+        <div class="meta">DEBT-005</div>
+        <span class="badge medium">MEDIUM</span>
+        <div class="spacer"><span class="badge tech-debt">TECH DEBT</span></div>
+      </div>
+      <div>
+        <h3>Double conversion sem guarda state-side</h3>
+        <div class="meta">Quote</div>
+        <p>UI impede em parte, mas idempotência formal de Quote → Invoice segue como decisão futura.</p>
+        <p><strong>Resolution / state:</strong> Finding separado.</p>
+      </div>
+      <div><span class="badge deferred">deferred</span></div>
+    </article>
+    <article class="card row">
+      <div>
+        <div class="meta">DEBT-006</div>
+        <span class="badge low">LOW</span>
+        <div class="spacer"><span class="badge product-decision">PRODUCT DECISION</span></div>
+      </div>
+      <div>
+        <h3>Hourly rate de Client Profile em Service Invoice</h3>
+        <div class="meta">Service Invoice</div>
+        <p>Hoje rate/OT do Profile é escopo de employee shift; service/Quote trabalha por quantidade/preço.</p>
+        <p><strong>Resolution / state:</strong> Aguardando regra de produto.</p>
+      </div>
+      <div><span class="badge open">open</span></div>
+    </article></div>
+</section>
+
+<section id="e2e">
+  <div class="sectionHead"><h2>Employee Invoice Crazy E2E</h2><span class="badge pass-through-save-edit">PASS through Save/Edit</span></div>
+  <div class="hero">
+    <div class="card release"><span class="small">Baseline</span><strong>£980.00</strong><div class="small">34h30</div></div>
+    <div class="card release"><span class="small">Final tested fixture</span><strong>£1,690.00</strong><div class="small">34h30</div></div>
+  </div>
+  <div class="sectionHead"><h2>Passos</h2></div>
+  <div class="card progress"><div class="step">
+      <span class="dot pass"></span>
+      <div>Client Profile £20 + custom OT rules</div>
+      <div><span class="badge pass">pass</span></div>
+    </div><div class="step">
+      <span class="dot pass"></span>
+      <div>Shift A 06:00–10:00 = 4h00 / £90</div>
+      <div><span class="badge pass">pass</span></div>
+    </div><div class="step">
+      <span class="dot pass"></span>
+      <div>Shift B 16:00–23:00 = 7h00 / £200</div>
+      <div><span class="badge pass">pass</span></div>
+    </div><div class="step">
+      <span class="dot pass"></span>
+      <div>Shift C 06:00–23:00 + 60m break = 16h00 / £390</div>
+      <div><span class="badge pass">pass</span></div>
+    </div><div class="step">
+      <span class="dot pass"></span>
+      <div>Shift D 18:00–23:00 @ £30 = 5h00 / £240</div>
+      <div><span class="badge pass">pass</span></div>
+    </div><div class="step">
+      <span class="dot pass"></span>
+      <div>Shift E 06:00–09:00 + 30m break = 2h30 / £60</div>
+      <div><span class="badge pass">pass</span></div>
+    </div><div class="step">
+      <span class="dot pass"></span>
+      <div>Home aggregate = 34h30 / £980</div>
+      <div><span class="badge pass">pass</span></div>
+    </div><div class="step">
+      <span class="dot pass"></span>
+      <div>Starter row seeded from Client defaults</div>
+      <div><span class="badge pass">pass</span></div>
+    </div><div class="step">
+      <span class="dot pass"></span>
+      <div>Generate from Shifts shows exactly 5 eligible shifts</div>
+      <div><span class="badge pass">pass</span></div>
+    </div><div class="step">
+      <span class="dot pass"></span>
+      <div>Import preserves time/break/rate/OT/rules snapshots</div>
+      <div><span class="badge pass">pass</span></div>
+    </div><div class="step">
+      <span class="dot pass"></span>
+      <div>Duplicate protection hides already imported shifts</div>
+      <div><span class="badge pass">pass</span></div>
+    </div><div class="step">
+      <span class="dot pass"></span>
+      <div>Removing a row unlocks only that source shift</div>
+      <div><span class="badge pass">pass</span></div>
+    </div><div class="step">
+      <span class="dot pass"></span>
+      <div>Manual rate edit £20 → £40 recalculates Invoice £980 → £1,070</div>
+      <div><span class="badge pass">pass</span></div>
+    </div><div class="step">
+      <span class="dot pass"></span>
+      <div>Original standalone Shift remains unchanged</div>
+      <div><span class="badge pass">pass</span></div>
+    </div><div class="step">
+      <span class="dot pass"></span>
+      <div>Break edit to 30m recalculates £1,070 → £1,050</div>
+      <div><span class="badge pass">pass</span></div>
+    </div><div class="step">
+      <span class="dot pass"></span>
+      <div>Time edit to 06:00–23:00 recalculates to £1,690</div>
+      <div><span class="badge pass">pass</span></div>
+    </div><div class="step">
+      <span class="dot pass"></span>
+      <div>Save persists £1,690</div>
+      <div><span class="badge pass">pass</span></div>
+    </div><div class="step">
+      <span class="dot pass"></span>
+      <div>Save → Edit preserves 5 rows, rate £40, break, OT/rules and total</div>
+      <div><span class="badge pass">pass</span></div>
+    </div><div class="step">
+      <span class="dot pass"></span>
+      <div>sourceShiftId survives Save → Edit</div>
+      <div><span class="badge pass">pass</span></div>
+    </div><div class="step">
+      <span class="dot pending"></span>
+      <div>Preview / PDF parity</div>
+      <div><span class="badge pending">pending</span></div>
+    </div><div class="step">
+      <span class="dot pending"></span>
+      <div>Expenses inside Invoice</div>
+      <div><span class="badge pending">pending</span></div>
     </div></div>
-    <div id="historyList" class="list"></div>`;
+</section>
 
-  const paint = () => {
-    const qv = $('q').value.toLowerCase();
-    const tv = $('typeFilter').value;
-    const sv = $('statusFilter').value;
-    const av = $('areaFilter').value;
-    const rows = items.filter(x =>
-      (!qv || JSON.stringify(x).toLowerCase().includes(qv)) &&
-      (!tv || x.type === tv) &&
-      (!sv || x.status === sv) &&
-      (!av || x.area === av)
-    );
-    $('historyList').innerHTML = rows.length ? rows.map(x=>`
-      <article class="card row">
-        <div><div class="meta">${esc(x.id)}</div>${badge(x.severity)}<div style="margin-top:6px">${badge(x.type)}</div></div>
-        <div><h3>${esc(x.title)}</h3><div class="meta">${esc(x.area)}</div><p>${esc(x.detail)}</p><p><strong>Resolution / state:</strong> ${esc(x.resolution)}</p></div>
-        <div>${badge(x.status)}</div>
-      </article>`).join('') : '<div class="card row">Nenhum item.</div>';
-  };
+<section id="regras">
+  <div class="sectionHead"><h2>Regras de domínio confirmadas</h2></div>
+  <div class="rules"><article class="card rule"><div class="meta">R-01</div><h3>Profile ID is authoritative</h3><p>When profileId/clientId exists, Profile identity wins over editable text.</p></article><article class="card rule"><div class="meta">R-02</div><h3>Manual name is not Profile identity</h3><p>Exact normalized name matching may be used only for approved eligibility/read-only legacy compatibility.</p></article><article class="card rule"><div class="meta">R-03</div><h3>One client per Employee Invoice</h3><p>Protected employee rows must not be silently mixed across client identities.</p></article><article class="card rule"><div class="meta">R-04</div><h3>Historical snapshot wins</h3><p>Imported/existing rows preserve rate, overtime and rules; current client defaults seed new rows only.</p></article><article class="card rule"><div class="meta">R-05</div><h3>Break maximizes employee pay</h3><p>Break minutes are deducted from the lowest active multiplier bucket first.</p></article><article class="card rule"><div class="meta">R-06</div><h3>Decimal internally, formatted visually</h3><p>Financial math keeps decimal hours; UI uses hours/minutes formatting.</p></article><article class="card rule"><div class="meta">R-07</div><h3>Duplicate protection is per Invoice</h3><p>The same historical Shift may appear in multiple Invoices, but not twice in the same one.</p></article></div>
+</section>
 
-  ['q','typeFilter','statusFilter','areaFilter'].forEach(id => $(id).addEventListener('input', paint));
-  paint();
-}
-renderHistory();
+<section id="proximos">
+  <div class="sectionHead"><h2>Próximos cenários</h2></div>
+  <div class="list"><article class="card row"><div><div class="meta">NEXT-01</div><span class="badge next">next</span></div><div><h3>Preview / PDF parity for £1,690 fixture</h3><div class="meta">Invoice</div></div><div></div></article><article class="card row"><div><div class="meta">NEXT-02</div><span class="badge pending">pending</span></div><div><h3>Expense standalone behavior</h3><div class="meta">Expenses</div></div><div></div></article><article class="card row"><div><div class="meta">NEXT-03</div><span class="badge pending">pending</span></div><div><h3>Expense linking and no double counting</h3><div class="meta">Invoice + Expenses</div></div><div></div></article><article class="card row"><div><div class="meta">NEXT-04</div><span class="badge pending">pending</span></div><div><h3>Quote → Invoice E2E with client snapshots</h3><div class="meta">Quotes</div></div><div></div></article><article class="card row"><div><div class="meta">NEXT-05</div><span class="badge pending">pending</span></div><div><h3>Delete standalone Shift already imported into Invoice</h3><div class="meta">Calendar</div></div><div></div></article><article class="card row"><div><div class="meta">NEXT-06</div><span class="badge pending">pending</span></div><div><h3>21:00–06:00 with multiple OT bands and break</h3><div class="meta">Cross-midnight</div></div><div></div></article><article class="card row"><div><div class="meta">NEXT-07</div><span class="badge pending">pending</span></div><div><h3>Break longer than complete 1x bucket</h3><div class="meta">Long break</div></div><div></div></article><article class="card row"><div><div class="meta">NEXT-08</div><span class="badge pending">pending</span></div><div><h3>Legacy clientName edit preservation</h3><div class="meta">Agenda</div></div><div></div></article></div>
+</section>
+</main>
 
-$('run').innerHTML = `
-<div class="sectionHead"><h2>${esc(d.latestRun.title)}</h2>${badge(d.latestRun.status)}</div>
-<div class="hero">
-  <div class="card release"><span class="small">Baseline</span><strong>${esc(d.latestRun.baseline.amount)}</strong><div class="small">${esc(d.latestRun.baseline.hours)}</div></div>
-  <div class="card release"><span class="small">Final tested fixture</span><strong>${esc(d.latestRun.final.amount)}</strong><div class="small">${esc(d.latestRun.final.hours)}</div></div>
-</div>
-<div class="sectionHead"><h2>Passos</h2></div>
-<div class="card progress">${d.latestRun.steps.map(x=>`<div class="step"><span class="dot ${cls(x.status)}"></span><div>${esc(x.name)}</div><div>${badge(x.status)}</div></div>`).join('')}</div>`;
-
-$('rules').innerHTML = `<div class="sectionHead"><h2>Regras de domínio confirmadas</h2></div><div class="rules">${d.rules.map(x=>`<article class="card rule"><div class="meta">${esc(x.id)}</div><h3>${esc(x.title)}</h3><p>${esc(x.text)}</p></article>`).join('')}</div>`;
-
-$('next').innerHTML = `<div class="sectionHead"><h2>Próximos cenários</h2></div><div class="list">${d.nextScenarios.map(x=>`<article class="card row"><div><div class="meta">${esc(x.id)}</div>${badge(x.status)}</div><div><h3>${esc(x.title)}</h3><div class="meta">${esc(x.area)}</div></div><div></div></article>`).join('')}</div>`;
-</script></body></html>
+<footer>Dashboard público estático • V2.1 sem dependência de JavaScript para renderização</footer>
+</body>
+</html>

@@ -1,19 +1,7 @@
-# TempusMate QA Dashboard v2
+# TempusMate QA Dashboard V2.1
 
-Dashboard público e estático para acompanhar estabilização, bugs, features/gaps, decisões de domínio e release readiness.
+Versão estática robusta para GitHub Pages.
 
-Arquivos principais:
-- `index.html`
-- `styles.css`
-- `qa-data.js`
+O HTML já é gerado com todos os dados embutidos no conteúdo. Portanto, mesmo que JavaScript seja bloqueado ou ocorra conflito com globais do browser, Histórico, E2E, Regras e Próximos continuam visíveis.
 
-O dashboard calcula os contadores automaticamente a partir de `qa-data.js`.
-
-Publicação no GitHub Pages:
-```bash
-git add .
-git commit -m "feat: upgrade QA dashboard v2"
-git push
-```
-
-Não publique tokens, endpoints privados, dumps ou dados reais de clientes.
+`qa-data.js` permanece no repositório como fonte estruturada para futuras automações.
