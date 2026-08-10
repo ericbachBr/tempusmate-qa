@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TempusMate QA Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <h1>🧪 TempusMate QA & E2E</h1>
+      <p id="updated"></p>
+    </div>
+    <nav id="nav">
+      <button data-tab="overview" class="active">Resumo</button>
+      <button data-tab="bugs">Bugs</button>
+      <button data-tab="tests">Testes</button>
+      <button data-tab="pending">Próximos</button>
+      <button data-tab="rules">Regras</button>
+      <button data-tab="debt">Dívidas</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section id="overview" class="section active"></section>
+  <section id="bugs" class="section"></section>
+  <section id="tests" class="section"></section>
+  <section id="pending" class="section"></section>
+  <section id="rules" class="section"></section>
+  <section id="debt" class="section"></section>
+</main>
+
+<footer>
+  Dados versionados junto com o repositório. Atualize <code>qa-data.js</code> a cada rodada de teste/fix.
+</footer>
+
+<script src="qa-data.js"></script>
+<script>
+const d = window.QA_DATA;
+const money = n => new Intl.NumberFormat('en-GB',{style:'currency',currency:d.meta.baseline.currency}).format(n);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const badge = (text, cls) => `<span class="badge ${cls}">${esc(text)}</span>`;
+
+document.getElementById('updated').textContent = `Atualizado em ${d.meta.updatedAt} • baseline ${d.meta.baseline.hours}h / ${money(d.meta.baseline.amount)}`;
+
+document.getElementById('nav').addEventListener('click', e => {
+  const btn = e.target.closest('button[data-tab]'); if (!btn) return;
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('active', b===btn));
+  document.querySelectorAll('.section').forEach(s => s.classList.toggle('active', s.id===btn.dataset.tab));
+});
+
+function renderOverview(){
+  const s=d.summary, b=d.meta.baseline;
+  document.getElementById('overview').innerHTML = `
+    <div class="hero">
+      <div class="card hero-main">
+        <h2>QA vivo, versionado e reaproveitável</h2>
+        <p>Um painel simples para acompanhar regressões, decisões de domínio, evidências manuais e cenários E2E sem depender de planilha estática.</p>
+      </div>
+      <div class="card baseline">
+        <span class="meta">Baseline E2E atual</span>
+        <strong>${b.hours}h · ${money(b.amount)}</strong>
+        <span class="meta">${esc(b.client)}</span>
+      </div>
+    </div>
+    <div class="grid">
+      ${[
+        ['Bugs',s.bugsCatalogued],['Resolvidos',s.resolvedOrImplemented],['Abertos',s.openOrPending],
+        ['Testes',s.testsExecuted],['Pendentes',s.pendingScenarios]
+      ].map(x=>`<div class="card metric"><span>${x[0]}</span><strong>${x[1]}</strong></div>`).join('')}
+    </div>
+    <div class="section-head"><h2>Baseline dos shifts</h2></div>
+    <div class="card"><table class="baseline-table">
+      <thead><tr><th>Shift</th><th>Horário</th><th>Break</th><th>Rate</th><th>Horas</th><th>Valor</th></tr></thead>
+      <tbody>${d.baselineShifts.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.time)}</td><td>${x.breakMinutes}m</td><td>${money(x.rate)}</td><td>${x.hours}h</td><td><strong>${money(x.amount)}</strong></td></tr>`).join('')}</tbody>
+    </table></div>`;
+}
+
+function renderBugs(){
+  const areas=[...new Set(d.bugs.map(x=>x.area))].sort();
+  document.getElementById('bugs').innerHTML = `
+    <div class="section-head"><h2>Bugs encontrados</h2>
+      <div class="toolbar">
+        <input id="bugSearch" type="search" placeholder="Buscar bug...">
+        <select id="bugStatus"><option value="">Todos status</option><option value="open">Aberto</option><option value="resolved">Resolvido</option><option value="implemented">Implementado</option></select>
+        <select id="bugArea"><option value="">Todas áreas</option>${areas.map(a=>`<option>${esc(a)}</option>`).join('')}</select>
+      </div>
+    </div><div id="bugList" class="list"></div>`;
+  const paint=()=>{
+    const q=document.getElementById('bugSearch').value.toLowerCase(), st=document.getElementById('bugStatus').value, ar=document.getElementById('bugArea').value;
+    const rows=d.bugs.filter(x=>(!q||JSON.stringify(x).toLowerCase().includes(q))&&(!st||x.status===st)&&(!ar||x.area===ar));
+    document.getElementById('bugList').innerHTML = rows.length ? rows.map(x=>`
+      <article class="card item">
+        <div><div class="meta">${esc(x.id)}</div>${badge(x.severity,x.severity.toLowerCase())}</div>
+        <div><h3>${esc(x.title)}</h3><div class="meta">${esc(x.area)}</div><p>${esc(x.description)}</p><p><strong>Correção/regra:</strong> ${esc(x.resolution)}</p><p><strong>Verificação:</strong> ${esc(x.verification)}</p></div>
+        <div>${badge(x.status,x.status)}</div>
+      </article>`).join('') : `<div class="card empty">Nenhum bug encontrado.</div>`;
+  };
+  ['bugSearch','bugStatus','bugArea'].forEach(id=>document.getElementById(id).addEventListener('input',paint)); paint();
+}
+
+function renderTests(){
+  document.getElementById('tests').innerHTML = `<div class="section-head"><h2>Testes executados</h2></div><div class="list">${
+    d.executedTests.map(x=>`<article class="card item"><div><div class="meta">${esc(x.id)}</div>${badge(x.status,x.status)}</div><div><h3>${esc(x.scenario)}</h3><div class="meta">${esc(x.area)}</div><p>${esc(x.result)}</p></div><div></div></article>`).join('')
+  }</div>`;
+}
+function renderPending(){
+  document.getElementById('pending').innerHTML = `<div class="section-head"><h2>Próximos cenários</h2></div><div class="list">${
+    d.pendingScenarios.map(x=>`<article class="card item"><div><div class="meta">${esc(x.id)}</div>${badge(x.status,x.status)}</div><div><h3>${esc(x.title)}</h3><div class="meta">${esc(x.area)}</div><p>${esc(x.expectation)}</p></div><div></div></article>`).join('')
+  }</div>`;
+}
+function renderRules(){
+  document.getElementById('rules').innerHTML = `<div class="section-head"><h2>Regras de domínio confirmadas</h2></div><div class="rules">${
+    d.rules.map(x=>`<article class="card rule"><div class="meta">${esc(x.id)}</div><h3>${esc(x.title)}</h3><p>${esc(x.text)}</p></article>`).join('')
+  }</div>`;
+}
+function renderDebt(){
+  document.getElementById('debt').innerHTML = `<div class="section-head"><h2>Dívidas / follow-ups conhecidos</h2></div><div class="list">${
+    d.knownDebt.map(x=>`<article class="card item"><div><div class="meta">${esc(x.id)}</div>${badge(x.status,x.status.replace(/\s+/g,'-'))}</div><div><h3>${esc(x.title)}</h3><p>${esc(x.detail)}</p></div><div></div></article>`).join('')
+  }</div>`;
+}
+renderOverview(); renderBugs(); renderTests(); renderPending(); renderRules(); renderDebt();
+</script>
+</body>
+</html>
