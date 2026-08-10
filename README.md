@@ -1,7 +1,11 @@
-# TempusMate QA Dashboard V2.1
+# TempusMate QA Dashboard v4
 
-Versão estática robusta para GitHub Pages.
+Substitua os arquivos do repositório GitHub Pages por estes e publique:
 
-O HTML já é gerado com todos os dados embutidos no conteúdo. Portanto, mesmo que JavaScript seja bloqueado ou ocorra conflito com globais do browser, Histórico, E2E, Regras e Próximos continuam visíveis.
+```bash
+git add .
+git commit -m "docs: update QA dashboard v4"
+git push
+```
 
-`qa-data.js` permanece no repositório como fonte estruturada para futuras automações.
+A v4 adiciona a Living Domain Specification, regras de identidade/Calendar, regressões e a seção da Super Auditoria.

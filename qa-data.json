@@ -1,0 +1,363 @@
+{
+  "version": "4.0",
+  "updated": "2026-08-10",
+  "unitTests": 458,
+  "items": [
+    {
+      "id": "BUG-001",
+      "type": "BUG",
+      "severity": "HIGH",
+      "status": "resolved",
+      "area": "Invoice",
+      "title": "Starter row não recebia defaults do Client Profile",
+      "detail": "Row inicial era criada antes da seleção do cliente e ficava sem rate/OT.",
+      "resolution": "Starter row blank é reseeded com os effective defaults."
+    },
+    {
+      "id": "BUG-002",
+      "type": "BUG",
+      "severity": "HIGH",
+      "status": "resolved",
+      "area": "Invoice",
+      "title": "Troca de cliente não atualizava corretamente rate/overtime",
+      "detail": "Defaults e snapshots podiam divergir ao trocar Profile.",
+      "resolution": "Client defaults foram centralizados para a sessão sem sobrescrever rows protegidas."
+    },
+    {
+      "id": "BUG-003",
+      "type": "BUG",
+      "severity": "HIGH",
+      "status": "resolved",
+      "area": "Invoice",
+      "title": "Risco de double counting em overtime/fees",
+      "detail": "Camadas diferentes podiam somar componentes mais de uma vez.",
+      "resolution": "calcFees ficou responsável somente pelo shift; Expenses entram uma vez na camada canônica."
+    },
+    {
+      "id": "BUG-004",
+      "type": "BUG",
+      "severity": "HIGH",
+      "status": "resolved",
+      "area": "Overtime",
+      "title": "Estados/regras de overtime do cliente não eram respeitados",
+      "detail": "Client Profiles diferentes podiam produzir regras incorretas.",
+      "resolution": "Regras efetivas do Profile passaram a alimentar a Invoice corretamente."
+    },
+    {
+      "id": "BUG-005",
+      "type": "BUG",
+      "severity": "HIGH",
+      "status": "resolved",
+      "area": "Invoice",
+      "title": "Hourly rate por cliente não preenchia automaticamente",
+      "detail": "Rate precisava ser repetido manualmente mesmo existindo no Profile.",
+      "resolution": "Client Profile pode fornecer hourly rate efetivo para novas rows."
+    },
+    {
+      "id": "BUG-006",
+      "type": "BUG",
+      "severity": "MEDIUM",
+      "status": "resolved",
+      "area": "Duration",
+      "title": "Horas apareciam como decimal visual",
+      "detail": "Ex.: 2.5h/02.05h confundia fração numérica com minutos.",
+      "resolution": "Cálculo continua decimal; UI usa formatHoursMinutes()."
+    },
+    {
+      "id": "BUG-007",
+      "type": "BUG",
+      "severity": "MEDIUM",
+      "status": "resolved",
+      "area": "Overtime",
+      "title": "Break allocation precisava ser confirmado",
+      "detail": "Havia dúvida sobre qual faixa de overtime absorvia o unpaid break.",
+      "resolution": "Regra confirmada: descontar do menor multiplier ativo primeiro."
+    },
+    {
+      "id": "BUG-008",
+      "type": "BUG",
+      "severity": "HIGH",
+      "status": "resolved",
+      "area": "Invoice",
+      "title": "Generate from Shifts permitia reimportar shift já presente",
+      "detail": "Usuário podia duplicar dezenas de shifts na mesma Invoice.",
+      "resolution": "sourceShiftId persistido por row e filtro per-Invoice."
+    },
+    {
+      "id": "BUG-009",
+      "type": "BUG",
+      "severity": "HIGH",
+      "status": "resolved",
+      "area": "Invoice",
+      "title": "Proteção contra duplicidade podia virar bloqueio global",
+      "detail": "Um Shift deve poder ser reutilizado em outra Invoice.",
+      "resolution": "Sem flag global invoiced/consumed; proteção é somente per-Invoice."
+    },
+    {
+      "id": "BUG-010",
+      "type": "BUG",
+      "severity": "HIGH",
+      "status": "resolved",
+      "area": "Calendar",
+      "title": "Calendar podia misturar clientes na mesma Invoice",
+      "detail": "Todos os shifts das datas eram transferidos e o primeiro cliente virava header.",
+      "resolution": "Agrupamento por identidade + escolha explícita do cliente."
+    },
+    {
+      "id": "BUG-011",
+      "type": "BUG",
+      "severity": "HIGH",
+      "status": "resolved",
+      "area": "Calendar",
+      "title": "Calendar descartava sourceShiftId e metadata",
+      "detail": "Origem, siteName, workerName e extraFees podiam se perder.",
+      "resolution": "Calendar usa o mesmo executeShiftsImport do selector."
+    },
+    {
+      "id": "BUG-012",
+      "type": "BUG",
+      "severity": "MEDIUM",
+      "status": "resolved",
+      "area": "Calendar UI",
+      "title": "Create Invoice mostrava N days",
+      "detail": "A operação realmente trabalha com shifts.",
+      "resolution": "Texto alterado para Create Invoice (N shifts)."
+    },
+    {
+      "id": "BUG-013",
+      "type": "BUG",
+      "severity": "MEDIUM",
+      "status": "resolved",
+      "area": "Calendar UI",
+      "title": "Cancel do modal não funcionava",
+      "detail": "onclick inline era bloqueado por CSP.",
+      "resolution": "Event listener + Playwright E2E; seleção é preservada."
+    },
+    {
+      "id": "BUG-014",
+      "type": "BUG",
+      "severity": "HIGH",
+      "status": "resolved",
+      "area": "Calendar Identity",
+      "title": "Profile ab e manual ab apareciam duplicados",
+      "detail": "Profile ab(2) importava 3, enquanto manual ab(1) importava 0.",
+      "resolution": "Exact normalized manual-name colapsa no Profile presente quando o match é único."
+    },
+    {
+      "id": "BUG-015",
+      "type": "BUG",
+      "severity": "MEDIUM",
+      "status": "implemented",
+      "area": "PDF",
+      "title": "Generated by TempusMate podia criar página órfã",
+      "detail": "Branding no fluxo normal ia sozinho para página 2.",
+      "resolution": "Transformado em footer fora do fluxo; falta smoke manual final."
+    },
+    {
+      "id": "RULE-001",
+      "type": "RULE",
+      "severity": "HIGH",
+      "status": "confirmed",
+      "area": "Identity",
+      "title": "Profile ID é autoritativo",
+      "detail": "Nomes iguais não tornam Profiles de IDs diferentes a mesma identidade.",
+      "resolution": "clientId vence nome; manual só reconcilia por exact normalized match."
+    },
+    {
+      "id": "RULE-002",
+      "type": "RULE",
+      "severity": "HIGH",
+      "status": "confirmed",
+      "area": "Identity",
+      "title": "Match manual nunca pode ser fuzzy",
+      "detail": "contains/alias/fuzzy pode faturar cliente errado.",
+      "resolution": "Somente match exato após normalização."
+    },
+    {
+      "id": "RULE-003",
+      "type": "RULE",
+      "severity": "HIGH",
+      "status": "confirmed",
+      "area": "Identity",
+      "title": "Ambiguidade não é resolvida silenciosamente",
+      "detail": "Dois Profiles com mesmo nome tornam manual-name ambíguo.",
+      "resolution": "Manual permanece separado; não escolher Profile arbitrariamente."
+    },
+    {
+      "id": "RULE-004",
+      "type": "RULE",
+      "severity": "HIGH",
+      "status": "confirmed",
+      "area": "Invoice",
+      "title": "sourceShiftId é per-Invoice",
+      "detail": "A origem evita duplicidade na Invoice atual.",
+      "resolution": "Outra Invoice pode reutilizar conscientemente o mesmo Shift."
+    },
+    {
+      "id": "RULE-005",
+      "type": "RULE",
+      "severity": "HIGH",
+      "status": "pending",
+      "area": "Calendar",
+      "title": "Unassigned deve exigir ação explícita",
+      "detail": "Blank shift hoje pode acompanhar silenciosamente Itau/Santander/Nubank e alterar o total.",
+      "resolution": "Calendar deve mostrar Unassigned como grupo próprio; escolher Profile nunca importa blank automaticamente."
+    },
+    {
+      "id": "RULE-006",
+      "type": "RULE",
+      "severity": "MEDIUM",
+      "status": "confirmed",
+      "area": "Generate from Shifts",
+      "title": "Blank pode continuar elegível dentro de Invoice já aberta",
+      "detail": "Aqui o usuário já escolheu conscientemente o cliente da Invoice.",
+      "resolution": "Regra intencionalmente diferente do Calendar."
+    },
+    {
+      "id": "RULE-007",
+      "type": "RULE",
+      "severity": "MEDIUM",
+      "status": "confirmed",
+      "area": "Overtime",
+      "title": "Break desconta menor multiplier primeiro",
+      "detail": "Política maximiza o pagamento e já é usada pelo engine.",
+      "resolution": "Manter ordem crescente de multiplier."
+    },
+    {
+      "id": "RULE-008",
+      "type": "RULE",
+      "severity": "MEDIUM",
+      "status": "confirmed",
+      "area": "Duration",
+      "title": "Decimal hours só internamente",
+      "detail": "2.5 é correto para cálculo, não para apresentação de duração.",
+      "resolution": "UI/PDF exibem hora/minuto real."
+    },
+    {
+      "id": "RULE-009",
+      "type": "RULE",
+      "severity": "LOW",
+      "status": "confirmed",
+      "area": "PDF",
+      "title": "SERVICE substitui SITE/JOB quando representa serviço",
+      "detail": "Terminologia anterior era pouco adequada principalmente em Service Invoice.",
+      "resolution": "Usar SERVICE; Employee Invoice usa BASE RATE."
+    },
+    {
+      "id": "RULE-010",
+      "type": "RULE",
+      "severity": "MEDIUM",
+      "status": "confirmed",
+      "area": "PDF",
+      "title": "Layout adapta densidade ao conteúdo",
+      "detail": "Documentos curtos não devem ficar minúsculos e longos não devem quebrar mal.",
+      "resolution": "comfortable/dense por contentWeight + proteção de page break."
+    },
+    {
+      "id": "REG-001",
+      "type": "REGRESSION",
+      "severity": "HIGH",
+      "status": "pass",
+      "area": "Invoice E2E",
+      "title": "Fixture financeiro complexo",
+      "detail": "Rate, overtime, break, mudança de cliente e snapshots foram testados manualmente.",
+      "resolution": "Resultado final validado: £1,690."
+    },
+    {
+      "id": "REG-002",
+      "type": "REGRESSION",
+      "severity": "HIGH",
+      "status": "pass",
+      "area": "Calendar",
+      "title": "Mixed-client grouping",
+      "detail": "Itau/Santander/manual identities testadas manualmente.",
+      "resolution": "Cada escolha montou a Invoice correspondente sem cross-client mixing."
+    },
+    {
+      "id": "REG-003",
+      "type": "REGRESSION",
+      "severity": "HIGH",
+      "status": "pass",
+      "area": "Calendar",
+      "title": "Profile ab x2 + manual ab x1",
+      "detail": "Caso que revelou divergência entre grouping e eligibility.",
+      "resolution": "Agora aparece um único grupo ab(3); regressões automatizadas cobrem case/whitespace/ambiguidade."
+    },
+    {
+      "id": "REG-004",
+      "type": "REGRESSION",
+      "severity": "MEDIUM",
+      "status": "pass",
+      "area": "Calendar UI",
+      "title": "Cancel preserva seleção",
+      "detail": "Fechar modal não deve limpar selectedHistoryDates.",
+      "resolution": "Coberto por Playwright."
+    },
+    {
+      "id": "DEBT-001",
+      "type": "TECH DEBT",
+      "severity": "HIGH",
+      "status": "ready",
+      "area": "Architecture",
+      "title": "Super auditoria de qualidade",
+      "detail": "Após centenas de ajustes, precisamos provar que regras equivalentes não estão duplicadas/divergindo.",
+      "resolution": "Auditoria independente: Claude Sonnet 5 + Gemini + ChatGPT; depois relatório de consenso."
+    }
+  ],
+  "next": [
+    {
+      "id": "NEXT-01",
+      "area": "Calendar",
+      "title": "Implementar/retestar grupo explícito Unassigned",
+      "status": "NEXT"
+    },
+    {
+      "id": "NEXT-02",
+      "area": "PDF",
+      "title": "Retestar footer sem página órfã",
+      "status": "PENDING"
+    },
+    {
+      "id": "NEXT-03",
+      "area": "PDF",
+      "title": "Stress 15 rows / dense mode",
+      "status": "PENDING"
+    },
+    {
+      "id": "NEXT-04",
+      "area": "PDF",
+      "title": "Stress 30 rows / multi-page",
+      "status": "PENDING"
+    },
+    {
+      "id": "NEXT-05",
+      "area": "Expenses",
+      "title": "Validar Expense standalone",
+      "status": "PENDING"
+    },
+    {
+      "id": "NEXT-06",
+      "area": "Invoice + Expenses",
+      "title": "Linked Expenses, receipts e no-double-counting",
+      "status": "PENDING"
+    },
+    {
+      "id": "NEXT-07",
+      "area": "Quotes",
+      "title": "Quote → Invoice E2E",
+      "status": "PENDING"
+    },
+    {
+      "id": "NEXT-08",
+      "area": "Architecture",
+      "title": "Super auditoria em 3 agentes + consenso",
+      "status": "READY"
+    },
+    {
+      "id": "NEXT-09",
+      "area": "QA Infra",
+      "title": "Fixture determinístico de ~90 dias",
+      "status": "PENDING"
+    }
+  ]
+}

@@ -1,615 +1,126 @@
 <!doctype html>
-<html lang="pt-BR">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TempusMate QA & Release Readiness</title>
-<link rel="stylesheet" href="styles.css">
-</head>
-<body>
-<header>
-  <div class="header">
-    <div class="brand">
-      <h1>🧪 TempusMate QA & Release Readiness</h1>
-      <p>Atualizado em 2026-08-09 • E2E in progress</p>
-    </div>
-    <nav>
-      <a href="#executivo">Executivo</a>
-      <a href="#historico">Histórico</a>
-      <a href="#e2e">Último E2E</a>
-      <a href="#regras">Regras</a>
-      <a href="#proximos">Próximos</a>
-    </nav>
-  </div>
-</header>
-
-<main>
-<section id="executivo">
-  <div class="hero">
-    <div class="card heroMain">
-      <h2>Core Employee Invoice flow validated through Save → Edit with complex overtime/rate scenarios.</h2>
-      <p>A versão ainda está em estabilização ativa. Vários bugs de integridade financeira e identidade foram encontrados e corrigidos antes de liberar uma nova build para teste externo.</p>
-    </div>
-    <div class="card release">
-      <span class="small">Release readiness</span>
-      <strong>E2E in progress</strong>
-      <span class="badge warning">warning</span>
-      <p class="small">PASS through Save/Edit • Clean build</p>
-    </div>
-  </div>
-
-  <div class="metrics">
-    <div class="card metric"><span>Confirmed bugs</span><strong>18</strong></div>
-    <div class="card metric"><span>Resolved bugs</span><strong>17</strong></div>
-    <div class="card metric"><span>Open / verify</span><strong>1</strong></div>
-    <div class="card metric"><span>Automated tests</span><strong>448</strong></div>
-    <div class="card metric"><span>Automated failures</span><strong>0</strong></div>
-  </div>
-
-  <div class="kpiStrip">
-    <div class="card progress">
-      <h3>Último E2E</h3>
-      <div class="small">Employee Invoice Crazy E2E</div>
-      <strong class="big">£1,690.00</strong>
-      <div class="small">34h30 • PASS through Save/Edit</div>
-    </div>
-    <div class="card callout">
-      <strong>Validação ainda restante</strong>
-      <div>• Invoice Preview / PDF parity</div><div>• Expense module and Expense ↔ Invoice integration</div><div>• Quote/Service follow-up scenarios</div><div>• Cross-midnight and long-break edge cases</div>
-    </div>
-  </div>
-
-  <div class="sectionHead"><h2>Distribuição do trabalho de estabilização</h2></div>
-  <div class="metrics">
-    <div class="card metric"><span>BUG</span><strong>18</strong></div><div class="card metric"><span>FEATURE / GAP</span><strong>7</strong></div><div class="card metric"><span>TECH DEBT</span><strong>5</strong></div><div class="card metric"><span>PRODUCT DECISION</span><strong>1</strong></div>
-    <div class="card metric"><span>Resolved / implemented items</span><strong>22</strong></div>
-  </div>
+<html lang="pt-BR"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TempusMate QA & Release Readiness v4</title><link rel="stylesheet" href="styles.css">
+</head><body>
+<header><div class="wrap top"><div><h1>🧪 TempusMate QA & Release Readiness</h1><p>Living QA Specification • v4 • 10 Aug 2026</p></div>
+<nav><a href="#exec">Executivo</a><a href="#history">Histórico</a><a href="#rules">Regras</a><a href="#audit">Super Auditoria</a><a href="#next">Próximos</a></nav></div></header>
+<main class="wrap">
+<section id="exec">
+<div class="hero card"><div><span class="eyebrow">RELEASE READINESS</span><h2>Core Invoice + Calendar estabilizados</h2><p>O QA já encontrou falhas reais de cálculo, overtime, identidade, importação duplicada e Calendar→Invoice. Agora fechamos Unassigned/PDF/Expenses e partimos para a auditoria arquitetural.</p></div><div class="statusbox"><span class="badge final-validation">FINAL VALIDATION</span><strong>458</strong><span>unit tests • 0 failures</span></div></div>
+<div class="metrics">
+<div class="card metric"><span>Bugs registrados</span><strong>15</strong></div>
+<div class="card metric"><span>Bugs resolvidos</span><strong>14</strong></div>
+<div class="card metric"><span>Regras vivas</span><strong>10</strong></div>
+<div class="card metric"><span>Regressões</span><strong>4</strong></div>
+<div class="card metric"><span>E2E financeiro</span><strong>£1,690</strong></div>
+</div>
+<div class="card warning"><b>⚠ Próximo blocker:</b> no Calendar, Shift totalmente sem cliente não deve entrar automaticamente na Invoice do Profile escolhido. Ele deve exigir seleção explícita via <b>Unassigned</b>.</div>
 </section>
 
-<section id="historico">
-  <div class="sectionHead"><h2>Master stabilization history</h2><span class="small">Sem JavaScript: conteúdo sempre visível no GitHub Pages.</span></div>
-  <div class="list">
-    <article class="card row">
-      <div>
-        <div class="meta">BUG-001</div>
-        <span class="badge high">HIGH</span>
-        <div class="spacer"><span class="badge bug">BUG</span></div>
-      </div>
-      <div>
-        <h3>Troca/reseleção de cliente reprecificava rows existentes</h3>
-        <div class="meta">Invoice / Client</div>
-        <p>Existing/imported employee rows recebiam novamente rate, overtime e regras do Client Profile, destruindo snapshots históricos.</p>
-        <p><strong>Resolution / state:</strong> Rows existentes passaram a ser snapshots protegidos; defaults do cliente só semeiam novas rows.</p>
-      </div>
-      <div><span class="badge resolved">resolved</span></div>
-    </article>
-    <article class="card row">
-      <div>
-        <div class="meta">BUG-002</div>
-        <span class="badge high">HIGH</span>
-        <div class="spacer"><span class="badge bug">BUG</span></div>
-      </div>
-      <div>
-        <h3>Import Shifts sem consciência do cliente da Invoice</h3>
-        <div class="meta">Invoice / Import</div>
-        <p>O seletor podia listar turnos de outros clientes.</p>
-        <p><strong>Resolution / state:</strong> Predicate de elegibilidade passou a respeitar profileId, nome manual exato e shifts realmente sem cliente.</p>
-      </div>
-      <div><span class="badge resolved">resolved</span></div>
-    </article>
-    <article class="card row">
-      <div>
-        <div class="meta">BUG-003</div>
-        <span class="badge medium">MEDIUM</span>
-        <div class="spacer"><span class="badge bug">BUG</span></div>
-      </div>
-      <div>
-        <h3>Invoice manual &#x27;Itau&#x27; não via shift do Profile Itau</h3>
-        <div class="meta">Invoice / Identity</div>
-        <p>Nome manual equivalente ao Profile era excluído do filtro.</p>
-        <p><strong>Resolution / state:</strong> Match exato de nome é aceito somente para elegibilidade; não cria Profile identity.</p>
-      </div>
-      <div><span class="badge resolved">resolved</span></div>
-    </article>
-    <article class="card row">
-      <div>
-        <div class="meta">BUG-004</div>
-        <span class="badge high">HIGH</span>
-        <div class="spacer"><span class="badge bug">BUG</span></div>
-      </div>
-      <div>
-        <h3>Profile selecionado + texto editado criava identidade híbrida</h3>
-        <div class="meta">Invoice / Identity</div>
-        <p>Selecionar Santander e editar o texto para Itau misturava resultados.</p>
-        <p><strong>Resolution / state:</strong> Com profileId presente, Profile é a única autoridade de elegibilidade.</p>
-      </div>
-      <div><span class="badge resolved">resolved</span></div>
-    </article>
-    <article class="card row">
-      <div>
-        <div class="meta">BUG-005</div>
-        <span class="badge high">HIGH</span>
-        <div class="spacer"><span class="badge bug">BUG</span></div>
-      </div>
-      <div>
-        <h3>Era possível trocar cliente com shifts já preenchidos</h3>
-        <div class="meta">Invoice / Client</div>
-        <p>Permitiria misturar ITAU + Santander na mesma Invoice.</p>
-        <p><strong>Resolution / state:</strong> Troca é bloqueada quando existem employee rows protegidas.</p>
-      </div>
-      <div><span class="badge resolved">resolved</span></div>
-    </article>
-    <article class="card row">
-      <div>
-        <div class="meta">BUG-006</div>
-        <span class="badge high">HIGH</span>
-        <div class="spacer"><span class="badge bug">BUG</span></div>
-      </div>
-      <div>
-        <h3>Nova row manual não recebia hourlyRate do cliente</h3>
-        <div class="meta">Invoice / Add Shift</div>
-        <p>O caller de + Add Shift omitía effectiveHourlyRate.</p>
-        <p><strong>Resolution / state:</strong> Rate efetivo passou a ser encaminhado; estado é resetado/rederivado ao abrir/editar.</p>
-      </div>
-      <div><span class="badge resolved">resolved</span></div>
-    </article>
-    <article class="card row">
-      <div>
-        <div class="meta">BUG-007</div>
-        <span class="badge high">HIGH</span>
-        <div class="spacer"><span class="badge bug">BUG</span></div>
-      </div>
-      <div>
-        <h3>Delete Shift confirmava mas não apagava</h3>
-        <div class="meta">Calendar / Shift</div>
-        <p>deleteShiftFromHistory chamava saveState() inexistente e abortava antes da persistência/render.</p>
-        <p><strong>Resolution / state:</strong> Passou a usar saveHistoryToLocalStorage().</p>
-      </div>
-      <div><span class="badge resolved">resolved</span></div>
-    </article>
-    <article class="card row">
-      <div>
-        <div class="meta">BUG-008</div>
-        <span class="badge medium">MEDIUM</span>
-        <div class="spacer"><span class="badge bug">BUG</span></div>
-      </div>
-      <div>
-        <h3>Starter row vazia não recebia defaults do Client</h3>
-        <div class="meta">Invoice / Starter Row</div>
-        <p>A row inicial existia antes da seleção do cliente e ficou sem rate/OT/regras após snapshot protection.</p>
-        <p><strong>Resolution / state:</strong> A única starter row realmente vazia é resemeada com os mesmos defaults de + Add Shift Row.</p>
-      </div>
-      <div><span class="badge resolved">resolved</span></div>
-    </article>
-    <article class="card row">
-      <div>
-        <div class="meta">BUG-009</div>
-        <span class="badge medium">MEDIUM</span>
-        <div class="spacer"><span class="badge bug">BUG</span></div>
-      </div>
-      <div>
-        <h3>Horas decimais exibidas como duração</h3>
-        <div class="meta">UI / Duration</div>
-        <p>Ex.: 2.50h era exibido diretamente em várias superfícies.</p>
-        <p><strong>Resolution / state:</strong> UI passou a usar formatHoursMinutes(); matemática/storage continuam em decimal.</p>
-      </div>
-      <div><span class="badge resolved">resolved</span></div>
-    </article>
-    <article class="card row">
-      <div>
-        <div class="meta">BUG-010</div>
-        <span class="badge high">HIGH</span>
-        <div class="spacer"><span class="badge bug">BUG</span></div>
-      </div>
-      <div>
-        <h3>Mesmo Shift podia ser importado várias vezes na mesma Invoice</h3>
-        <div class="meta">Invoice / Import</div>
-        <p>Reabrir Generate from Shifts mostrava novamente shifts já importados.</p>
-        <p><strong>Resolution / state:</strong> sourceShiftId é persistido por row/Invoice e o selector exclui apenas IDs já presentes na Invoice ativa.</p>
-      </div>
-      <div><span class="badge resolved">resolved</span></div>
-    </article>
-    <article class="card row">
-      <div>
-        <div class="meta">BUG-011</div>
-        <span class="badge high">HIGH</span>
-        <div class="spacer"><span class="badge bug">BUG</span></div>
-      </div>
-      <div>
-        <h3>Detach de Client Profile deixava campos antigos na Quote</h3>
-        <div class="meta">Quote / Client</div>
-        <p>Ao remover o profile, apenas o badge era limpo; dados derivados permaneciam.</p>
-        <p><strong>Resolution / state:</strong> Blank branch passou a limpar os 5 campos derivados.</p>
-      </div>
-      <div><span class="badge resolved">resolved</span></div>
-    </article>
-    <article class="card row">
-      <div>
-        <div class="meta">BUG-012</div>
-        <span class="badge high">HIGH</span>
-        <div class="spacer"><span class="badge bug">BUG</span></div>
-      </div>
-      <div>
-        <h3>Quote fazia relink por nome ao editar</h3>
-        <div class="meta">Quote / Identity</div>
-        <p>loadQuoteIntoForm usava comparação de nome e podia associar perfil errado.</p>
-        <p><strong>Resolution / state:</strong> Restore do dropdown passou a usar profileId exclusivamente.</p>
-      </div>
-      <div><span class="badge resolved">resolved</span></div>
-    </article>
-    <article class="card row">
-      <div>
-        <div class="meta">BUG-013</div>
-        <span class="badge high">HIGH</span>
-        <div class="spacer"><span class="badge bug">BUG</span></div>
-      </div>
-      <div>
-        <h3>Quote não persistia profileId</h3>
-        <div class="meta">Quote / Identity</div>
-        <p>Não havia como distinguir entrada manual de cliente derivado de Profile.</p>
-        <p><strong>Resolution / state:</strong> Quote passou a persistir profileId e snapshot de identidade.</p>
-      </div>
-      <div><span class="badge resolved">resolved</span></div>
-    </article>
-    <article class="card row">
-      <div>
-        <div class="meta">BUG-014</div>
-        <span class="badge medium">MEDIUM</span>
-        <div class="spacer"><span class="badge bug">BUG</span></div>
-      </div>
-      <div>
-        <h3>Quote lia contactPerson em vez de contact do Profile</h3>
-        <div class="meta">Quote / Client</div>
-        <p>Contact Person ficava vazio ao carregar Client Profile.</p>
-        <p><strong>Resolution / state:</strong> Boundary Profile → Quote usa client.contact; snapshot Quote continua contactPerson.</p>
-      </div>
-      <div><span class="badge resolved">resolved</span></div>
-    </article>
-    <article class="card row">
-      <div>
-        <div class="meta">BUG-015</div>
-        <span class="badge high">HIGH</span>
-        <div class="spacer"><span class="badge bug">BUG</span></div>
-      </div>
-      <div>
-        <h3>Conversão não preservava identidade do cliente</h3>
-        <div class="meta">Quote → Invoice</div>
-        <p>Invoice convertida perdia vínculo explícito do Profile depois que name fallback foi removido.</p>
-        <p><strong>Resolution / state:</strong> Quote → Invoice carrega profileId do snapshot.</p>
-      </div>
-      <div><span class="badge resolved">resolved</span></div>
-    </article>
-    <article class="card row">
-      <div>
-        <div class="meta">BUG-016</div>
-        <span class="badge high">HIGH</span>
-        <div class="spacer"><span class="badge bug">BUG</span></div>
-      </div>
-      <div>
-        <h3>B2B/VAT/country não existiam no snapshot da Quote</h3>
-        <div class="meta">Quote → Invoice</div>
-        <p>Invoice convertida podia declarar Profile mas carregar defaults B2C/GB/vazio inconsistentes.</p>
-        <p><strong>Resolution / state:</strong> Quote captura isBusiness/vatNumber/country no Save e conversão usa apenas snapshot.</p>
-      </div>
-      <div><span class="badge resolved">resolved</span></div>
-    </article>
-    <article class="card row">
-      <div>
-        <div class="meta">BUG-017</div>
-        <span class="badge high">HIGH</span>
-        <div class="spacer"><span class="badge bug">BUG</span></div>
-      </div>
-      <div>
-        <h3>toggleInvoicePaid podia deixar calcFees desatualizado</h3>
-        <div class="meta">Invoice / Totals</div>
-        <p>Finding histórico identificado durante auditoria anterior: mudar Paid podia congelar total calculado incorretamente.</p>
-        <p><strong>Resolution / state:</strong> Mantido no histórico como finding prévio; confirmar status atual antes de marcar como fechado.</p>
-      </div>
-      <div><span class="badge known">known</span></div>
-    </article>
-    <article class="card row">
-      <div>
-        <div class="meta">BUG-018</div>
-        <span class="badge high">HIGH</span>
-        <div class="spacer"><span class="badge bug">BUG</span></div>
-      </div>
-      <div>
-        <h3>Troca de cliente não recalculava corretamente configuração de overtime</h3>
-        <div class="meta">Invoice / Overtime</div>
-        <p>Gap original do ciclo de estabilização; depois evoluiu para política de snapshot e defaults por cliente.</p>
-        <p><strong>Resolution / state:</strong> Regra consolidada: existentes preservam snapshot; novas rows recebem defaults do cliente atual.</p>
-      </div>
-      <div><span class="badge resolved">resolved</span></div>
-    </article>
-    <article class="card row">
-      <div>
-        <div class="meta">GAP-001</div>
-        <span class="badge medium">MEDIUM</span>
-        <div class="spacer"><span class="badge feature---gap">FEATURE / GAP</span></div>
-      </div>
-      <div>
-        <h3>Recibos no PDF</h3>
-        <div class="meta">PDF</div>
-        <p>Item original de estabilização: comprovantes/recibos não apareciam no PDF.</p>
-        <p><strong>Resolution / state:</strong> Pendência histórica / validar implementação atual.</p>
-      </div>
-      <div><span class="badge planned">planned</span></div>
-    </article>
-    <article class="card row">
-      <div>
-        <div class="meta">GAP-002</div>
-        <span class="badge medium">MEDIUM</span>
-        <div class="spacer"><span class="badge feature---gap">FEATURE / GAP</span></div>
-      </div>
-      <div>
-        <h3>Descrição financeira de extras no PDF</h3>
-        <div class="meta">PDF</div>
-        <p>Item original de estabilização: descrição de extras precisava aparecer no PDF.</p>
-        <p><strong>Resolution / state:</strong> Validar no bloco Preview/PDF.</p>
-      </div>
-      <div><span class="badge planned">planned</span></div>
-    </article>
-    <article class="card row">
-      <div>
-        <div class="meta">GAP-003</div>
-        <span class="badge medium">MEDIUM</span>
-        <div class="spacer"><span class="badge feature---gap">FEATURE / GAP</span></div>
-      </div>
-      <div>
-        <h3>Hourly rate por cliente</h3>
-        <div class="meta">Client Profile</div>
-        <p>Cliente pode definir rate padrão para novas employee rows.</p>
-        <p><strong>Resolution / state:</strong> Implementado e validado no E2E atual.</p>
-      </div>
-      <div><span class="badge implemented">implemented</span></div>
-    </article>
-    <article class="card row">
-      <div>
-        <div class="meta">GAP-004</div>
-        <span class="badge low">LOW</span>
-        <div class="spacer"><span class="badge feature---gap">FEATURE / GAP</span></div>
-      </div>
-      <div>
-        <h3>Remover overrides fixos 1.5x/2x/3x</h3>
-        <div class="meta">Overtime</div>
-        <p>Simplificação para usar regras configuradas em vez de overrides soltos.</p>
-        <p><strong>Resolution / state:</strong> Integrado ao fluxo atual de regras.</p>
-      </div>
-      <div><span class="badge implemented">implemented</span></div>
-    </article>
-    <article class="card row">
-      <div>
-        <div class="meta">GAP-005</div>
-        <span class="badge low">LOW</span>
-        <div class="spacer"><span class="badge feature---gap">FEATURE / GAP</span></div>
-      </div>
-      <div>
-        <h3>Live breakdown</h3>
-        <div class="meta">Invoice UI</div>
-        <p>Necessidade de breakdown ao vivo durante edição de Invoice.</p>
-        <p><strong>Resolution / state:</strong> Presente no fluxo atual; ainda precisa cobertura runtime mais forte.</p>
-      </div>
-      <div><span class="badge implemented">implemented</span></div>
-    </article>
-    <article class="card row">
-      <div>
-        <div class="meta">GAP-006</div>
-        <span class="badge low">LOW</span>
-        <div class="spacer"><span class="badge feature---gap">FEATURE / GAP</span></div>
-      </div>
-      <div>
-        <h3>Load Profile / dados do usuário</h3>
-        <div class="meta">Profile</div>
-        <p>Fluxo de carregar dados do próprio usuário no formulário.</p>
-        <p><strong>Resolution / state:</strong> Implementado anteriormente.</p>
-      </div>
-      <div><span class="badge implemented">implemented</span></div>
-    </article>
-    <article class="card row">
-      <div>
-        <div class="meta">GAP-007</div>
-        <span class="badge low">LOW</span>
-        <div class="spacer"><span class="badge feature---gap">FEATURE / GAP</span></div>
-      </div>
-      <div>
-        <h3>Redesign lista + modal</h3>
-        <div class="meta">Invoice UI</div>
-        <p>Reorganização de UX de Invoice/rows.</p>
-        <p><strong>Resolution / state:</strong> Implementado em etapas; Home experiment foi mantido minimalista.</p>
-      </div>
-      <div><span class="badge implemented">implemented</span></div>
-    </article>
-    <article class="card row">
-      <div>
-        <div class="meta">DEBT-001</div>
-        <span class="badge medium">MEDIUM</span>
-        <div class="spacer"><span class="badge tech-debt">TECH DEBT</span></div>
-      </div>
-      <div>
-        <h3>rules: [] pode cair em State.defaultRules live</h3>
-        <div class="meta">Overtime</div>
-        <p>Registro histórico sem regras explícitas ainda pode resolver defaults atuais.</p>
-        <p><strong>Resolution / state:</strong> Documentado como follow-up separado.</p>
-      </div>
-      <div><span class="badge deferred">deferred</span></div>
-    </article>
-    <article class="card row">
-      <div>
-        <div class="meta">DEBT-002</div>
-        <span class="badge high">HIGH</span>
-        <div class="spacer"><span class="badge tech-debt">TECH DEBT</span></div>
-      </div>
-      <div>
-        <h3>Testes regex/source-level demais</h3>
-        <div class="meta">Tests</div>
-        <p>Alguns testes verificam strings/código-fonte em vez de executar DOM/runtime real.</p>
-        <p><strong>Resolution / state:</strong> Manter como guarda temporária; aumentar JSDOM/E2E gradualmente.</p>
-      </div>
-      <div><span class="badge deferred">deferred</span></div>
-    </article>
-    <article class="card row">
-      <div>
-        <div class="meta">DEBT-003</div>
-        <span class="badge medium">MEDIUM</span>
-        <div class="spacer"><span class="badge tech-debt">TECH DEBT</span></div>
-      </div>
-      <div>
-        <h3>Premissas antigas sobre clientId de Invoice</h3>
-        <div class="meta">Expenses</div>
-        <p>Expense ainda contém lógica/comentários anteriores ao invoice.client.profileId.</p>
-        <p><strong>Resolution / state:</strong> Auditar quando entrar no bloco Expenses.</p>
-      </div>
-      <div><span class="badge follow-up">follow-up</span></div>
-    </article>
-    <article class="card row">
-      <div>
-        <div class="meta">DEBT-004</div>
-        <span class="badge medium">MEDIUM</span>
-        <div class="spacer"><span class="badge tech-debt">TECH DEBT</span></div>
-      </div>
-      <div>
-        <h3>Edit de evento legado pode perder clientName</h3>
-        <div class="meta">Agenda</div>
-        <p>Fallback por nome é read-only e seguro, mas edição de legado sem clientId pode apagar nome antigo.</p>
-        <p><strong>Resolution / state:</strong> Investigar no bloco Agenda.</p>
-      </div>
-      <div><span class="badge follow-up">follow-up</span></div>
-    </article>
-    <article class="card row">
-      <div>
-        <div class="meta">DEBT-005</div>
-        <span class="badge medium">MEDIUM</span>
-        <div class="spacer"><span class="badge tech-debt">TECH DEBT</span></div>
-      </div>
-      <div>
-        <h3>Double conversion sem guarda state-side</h3>
-        <div class="meta">Quote</div>
-        <p>UI impede em parte, mas idempotência formal de Quote → Invoice segue como decisão futura.</p>
-        <p><strong>Resolution / state:</strong> Finding separado.</p>
-      </div>
-      <div><span class="badge deferred">deferred</span></div>
-    </article>
-    <article class="card row">
-      <div>
-        <div class="meta">DEBT-006</div>
-        <span class="badge low">LOW</span>
-        <div class="spacer"><span class="badge product-decision">PRODUCT DECISION</span></div>
-      </div>
-      <div>
-        <h3>Hourly rate de Client Profile em Service Invoice</h3>
-        <div class="meta">Service Invoice</div>
-        <p>Hoje rate/OT do Profile é escopo de employee shift; service/Quote trabalha por quantidade/preço.</p>
-        <p><strong>Resolution / state:</strong> Aguardando regra de produto.</p>
-      </div>
-      <div><span class="badge open">open</span></div>
-    </article></div>
+<section id="history"><div class="sectionhead"><h2>Master Stabilization History</h2><p>Bugs, regressões, decisões e dívida técnica encontrados durante a estabilização.</p></div><article class="card item">
+      <div class="item-tags"><strong>BUG-001</strong><span class="badge bug">BUG</span><span class="badge high">HIGH</span><span class="badge resolved">resolved</span></div>
+      <div><h3>Starter row não recebia defaults do Client Profile</h3><div class="muted">Invoice</div><p>Row inicial era criada antes da seleção do cliente e ficava sem rate/OT.</p><p><b>Estado / regra:</b> Starter row blank é reseeded com os effective defaults.</p></div>
+    </article><article class="card item">
+      <div class="item-tags"><strong>BUG-002</strong><span class="badge bug">BUG</span><span class="badge high">HIGH</span><span class="badge resolved">resolved</span></div>
+      <div><h3>Troca de cliente não atualizava corretamente rate/overtime</h3><div class="muted">Invoice</div><p>Defaults e snapshots podiam divergir ao trocar Profile.</p><p><b>Estado / regra:</b> Client defaults foram centralizados para a sessão sem sobrescrever rows protegidas.</p></div>
+    </article><article class="card item">
+      <div class="item-tags"><strong>BUG-003</strong><span class="badge bug">BUG</span><span class="badge high">HIGH</span><span class="badge resolved">resolved</span></div>
+      <div><h3>Risco de double counting em overtime/fees</h3><div class="muted">Invoice</div><p>Camadas diferentes podiam somar componentes mais de uma vez.</p><p><b>Estado / regra:</b> calcFees ficou responsável somente pelo shift; Expenses entram uma vez na camada canônica.</p></div>
+    </article><article class="card item">
+      <div class="item-tags"><strong>BUG-004</strong><span class="badge bug">BUG</span><span class="badge high">HIGH</span><span class="badge resolved">resolved</span></div>
+      <div><h3>Estados/regras de overtime do cliente não eram respeitados</h3><div class="muted">Overtime</div><p>Client Profiles diferentes podiam produzir regras incorretas.</p><p><b>Estado / regra:</b> Regras efetivas do Profile passaram a alimentar a Invoice corretamente.</p></div>
+    </article><article class="card item">
+      <div class="item-tags"><strong>BUG-005</strong><span class="badge bug">BUG</span><span class="badge high">HIGH</span><span class="badge resolved">resolved</span></div>
+      <div><h3>Hourly rate por cliente não preenchia automaticamente</h3><div class="muted">Invoice</div><p>Rate precisava ser repetido manualmente mesmo existindo no Profile.</p><p><b>Estado / regra:</b> Client Profile pode fornecer hourly rate efetivo para novas rows.</p></div>
+    </article><article class="card item">
+      <div class="item-tags"><strong>BUG-006</strong><span class="badge bug">BUG</span><span class="badge medium">MEDIUM</span><span class="badge resolved">resolved</span></div>
+      <div><h3>Horas apareciam como decimal visual</h3><div class="muted">Duration</div><p>Ex.: 2.5h/02.05h confundia fração numérica com minutos.</p><p><b>Estado / regra:</b> Cálculo continua decimal; UI usa formatHoursMinutes().</p></div>
+    </article><article class="card item">
+      <div class="item-tags"><strong>BUG-007</strong><span class="badge bug">BUG</span><span class="badge medium">MEDIUM</span><span class="badge resolved">resolved</span></div>
+      <div><h3>Break allocation precisava ser confirmado</h3><div class="muted">Overtime</div><p>Havia dúvida sobre qual faixa de overtime absorvia o unpaid break.</p><p><b>Estado / regra:</b> Regra confirmada: descontar do menor multiplier ativo primeiro.</p></div>
+    </article><article class="card item">
+      <div class="item-tags"><strong>BUG-008</strong><span class="badge bug">BUG</span><span class="badge high">HIGH</span><span class="badge resolved">resolved</span></div>
+      <div><h3>Generate from Shifts permitia reimportar shift já presente</h3><div class="muted">Invoice</div><p>Usuário podia duplicar dezenas de shifts na mesma Invoice.</p><p><b>Estado / regra:</b> sourceShiftId persistido por row e filtro per-Invoice.</p></div>
+    </article><article class="card item">
+      <div class="item-tags"><strong>BUG-009</strong><span class="badge bug">BUG</span><span class="badge high">HIGH</span><span class="badge resolved">resolved</span></div>
+      <div><h3>Proteção contra duplicidade podia virar bloqueio global</h3><div class="muted">Invoice</div><p>Um Shift deve poder ser reutilizado em outra Invoice.</p><p><b>Estado / regra:</b> Sem flag global invoiced/consumed; proteção é somente per-Invoice.</p></div>
+    </article><article class="card item">
+      <div class="item-tags"><strong>BUG-010</strong><span class="badge bug">BUG</span><span class="badge high">HIGH</span><span class="badge resolved">resolved</span></div>
+      <div><h3>Calendar podia misturar clientes na mesma Invoice</h3><div class="muted">Calendar</div><p>Todos os shifts das datas eram transferidos e o primeiro cliente virava header.</p><p><b>Estado / regra:</b> Agrupamento por identidade + escolha explícita do cliente.</p></div>
+    </article><article class="card item">
+      <div class="item-tags"><strong>BUG-011</strong><span class="badge bug">BUG</span><span class="badge high">HIGH</span><span class="badge resolved">resolved</span></div>
+      <div><h3>Calendar descartava sourceShiftId e metadata</h3><div class="muted">Calendar</div><p>Origem, siteName, workerName e extraFees podiam se perder.</p><p><b>Estado / regra:</b> Calendar usa o mesmo executeShiftsImport do selector.</p></div>
+    </article><article class="card item">
+      <div class="item-tags"><strong>BUG-012</strong><span class="badge bug">BUG</span><span class="badge medium">MEDIUM</span><span class="badge resolved">resolved</span></div>
+      <div><h3>Create Invoice mostrava N days</h3><div class="muted">Calendar UI</div><p>A operação realmente trabalha com shifts.</p><p><b>Estado / regra:</b> Texto alterado para Create Invoice (N shifts).</p></div>
+    </article><article class="card item">
+      <div class="item-tags"><strong>BUG-013</strong><span class="badge bug">BUG</span><span class="badge medium">MEDIUM</span><span class="badge resolved">resolved</span></div>
+      <div><h3>Cancel do modal não funcionava</h3><div class="muted">Calendar UI</div><p>onclick inline era bloqueado por CSP.</p><p><b>Estado / regra:</b> Event listener + Playwright E2E; seleção é preservada.</p></div>
+    </article><article class="card item">
+      <div class="item-tags"><strong>BUG-014</strong><span class="badge bug">BUG</span><span class="badge high">HIGH</span><span class="badge resolved">resolved</span></div>
+      <div><h3>Profile ab e manual ab apareciam duplicados</h3><div class="muted">Calendar Identity</div><p>Profile ab(2) importava 3, enquanto manual ab(1) importava 0.</p><p><b>Estado / regra:</b> Exact normalized manual-name colapsa no Profile presente quando o match é único.</p></div>
+    </article><article class="card item">
+      <div class="item-tags"><strong>BUG-015</strong><span class="badge bug">BUG</span><span class="badge medium">MEDIUM</span><span class="badge implemented">implemented</span></div>
+      <div><h3>Generated by TempusMate podia criar página órfã</h3><div class="muted">PDF</div><p>Branding no fluxo normal ia sozinho para página 2.</p><p><b>Estado / regra:</b> Transformado em footer fora do fluxo; falta smoke manual final.</p></div>
+    </article><article class="card item">
+      <div class="item-tags"><strong>RULE-001</strong><span class="badge rule">RULE</span><span class="badge high">HIGH</span><span class="badge confirmed">confirmed</span></div>
+      <div><h3>Profile ID é autoritativo</h3><div class="muted">Identity</div><p>Nomes iguais não tornam Profiles de IDs diferentes a mesma identidade.</p><p><b>Estado / regra:</b> clientId vence nome; manual só reconcilia por exact normalized match.</p></div>
+    </article><article class="card item">
+      <div class="item-tags"><strong>RULE-002</strong><span class="badge rule">RULE</span><span class="badge high">HIGH</span><span class="badge confirmed">confirmed</span></div>
+      <div><h3>Match manual nunca pode ser fuzzy</h3><div class="muted">Identity</div><p>contains/alias/fuzzy pode faturar cliente errado.</p><p><b>Estado / regra:</b> Somente match exato após normalização.</p></div>
+    </article><article class="card item">
+      <div class="item-tags"><strong>RULE-003</strong><span class="badge rule">RULE</span><span class="badge high">HIGH</span><span class="badge confirmed">confirmed</span></div>
+      <div><h3>Ambiguidade não é resolvida silenciosamente</h3><div class="muted">Identity</div><p>Dois Profiles com mesmo nome tornam manual-name ambíguo.</p><p><b>Estado / regra:</b> Manual permanece separado; não escolher Profile arbitrariamente.</p></div>
+    </article><article class="card item">
+      <div class="item-tags"><strong>RULE-004</strong><span class="badge rule">RULE</span><span class="badge high">HIGH</span><span class="badge confirmed">confirmed</span></div>
+      <div><h3>sourceShiftId é per-Invoice</h3><div class="muted">Invoice</div><p>A origem evita duplicidade na Invoice atual.</p><p><b>Estado / regra:</b> Outra Invoice pode reutilizar conscientemente o mesmo Shift.</p></div>
+    </article><article class="card item">
+      <div class="item-tags"><strong>RULE-005</strong><span class="badge rule">RULE</span><span class="badge high">HIGH</span><span class="badge pending">pending</span></div>
+      <div><h3>Unassigned deve exigir ação explícita</h3><div class="muted">Calendar</div><p>Blank shift hoje pode acompanhar silenciosamente Itau/Santander/Nubank e alterar o total.</p><p><b>Estado / regra:</b> Calendar deve mostrar Unassigned como grupo próprio; escolher Profile nunca importa blank automaticamente.</p></div>
+    </article><article class="card item">
+      <div class="item-tags"><strong>RULE-006</strong><span class="badge rule">RULE</span><span class="badge medium">MEDIUM</span><span class="badge confirmed">confirmed</span></div>
+      <div><h3>Blank pode continuar elegível dentro de Invoice já aberta</h3><div class="muted">Generate from Shifts</div><p>Aqui o usuário já escolheu conscientemente o cliente da Invoice.</p><p><b>Estado / regra:</b> Regra intencionalmente diferente do Calendar.</p></div>
+    </article><article class="card item">
+      <div class="item-tags"><strong>RULE-007</strong><span class="badge rule">RULE</span><span class="badge medium">MEDIUM</span><span class="badge confirmed">confirmed</span></div>
+      <div><h3>Break desconta menor multiplier primeiro</h3><div class="muted">Overtime</div><p>Política maximiza o pagamento e já é usada pelo engine.</p><p><b>Estado / regra:</b> Manter ordem crescente de multiplier.</p></div>
+    </article><article class="card item">
+      <div class="item-tags"><strong>RULE-008</strong><span class="badge rule">RULE</span><span class="badge medium">MEDIUM</span><span class="badge confirmed">confirmed</span></div>
+      <div><h3>Decimal hours só internamente</h3><div class="muted">Duration</div><p>2.5 é correto para cálculo, não para apresentação de duração.</p><p><b>Estado / regra:</b> UI/PDF exibem hora/minuto real.</p></div>
+    </article><article class="card item">
+      <div class="item-tags"><strong>RULE-009</strong><span class="badge rule">RULE</span><span class="badge low">LOW</span><span class="badge confirmed">confirmed</span></div>
+      <div><h3>SERVICE substitui SITE/JOB quando representa serviço</h3><div class="muted">PDF</div><p>Terminologia anterior era pouco adequada principalmente em Service Invoice.</p><p><b>Estado / regra:</b> Usar SERVICE; Employee Invoice usa BASE RATE.</p></div>
+    </article><article class="card item">
+      <div class="item-tags"><strong>RULE-010</strong><span class="badge rule">RULE</span><span class="badge medium">MEDIUM</span><span class="badge confirmed">confirmed</span></div>
+      <div><h3>Layout adapta densidade ao conteúdo</h3><div class="muted">PDF</div><p>Documentos curtos não devem ficar minúsculos e longos não devem quebrar mal.</p><p><b>Estado / regra:</b> comfortable/dense por contentWeight + proteção de page break.</p></div>
+    </article><article class="card item">
+      <div class="item-tags"><strong>REG-001</strong><span class="badge regression">REGRESSION</span><span class="badge high">HIGH</span><span class="badge pass">pass</span></div>
+      <div><h3>Fixture financeiro complexo</h3><div class="muted">Invoice E2E</div><p>Rate, overtime, break, mudança de cliente e snapshots foram testados manualmente.</p><p><b>Estado / regra:</b> Resultado final validado: £1,690.</p></div>
+    </article><article class="card item">
+      <div class="item-tags"><strong>REG-002</strong><span class="badge regression">REGRESSION</span><span class="badge high">HIGH</span><span class="badge pass">pass</span></div>
+      <div><h3>Mixed-client grouping</h3><div class="muted">Calendar</div><p>Itau/Santander/manual identities testadas manualmente.</p><p><b>Estado / regra:</b> Cada escolha montou a Invoice correspondente sem cross-client mixing.</p></div>
+    </article><article class="card item">
+      <div class="item-tags"><strong>REG-003</strong><span class="badge regression">REGRESSION</span><span class="badge high">HIGH</span><span class="badge pass">pass</span></div>
+      <div><h3>Profile ab x2 + manual ab x1</h3><div class="muted">Calendar</div><p>Caso que revelou divergência entre grouping e eligibility.</p><p><b>Estado / regra:</b> Agora aparece um único grupo ab(3); regressões automatizadas cobrem case/whitespace/ambiguidade.</p></div>
+    </article><article class="card item">
+      <div class="item-tags"><strong>REG-004</strong><span class="badge regression">REGRESSION</span><span class="badge medium">MEDIUM</span><span class="badge pass">pass</span></div>
+      <div><h3>Cancel preserva seleção</h3><div class="muted">Calendar UI</div><p>Fechar modal não deve limpar selectedHistoryDates.</p><p><b>Estado / regra:</b> Coberto por Playwright.</p></div>
+    </article><article class="card item">
+      <div class="item-tags"><strong>DEBT-001</strong><span class="badge tech-debt">TECH DEBT</span><span class="badge high">HIGH</span><span class="badge ready">ready</span></div>
+      <div><h3>Super auditoria de qualidade</h3><div class="muted">Architecture</div><p>Após centenas de ajustes, precisamos provar que regras equivalentes não estão duplicadas/divergindo.</p><p><b>Estado / regra:</b> Auditoria independente: Claude Sonnet 5 + Gemini + ChatGPT; depois relatório de consenso.</p></div>
+    </article></section>
+
+<section id="rules"><div class="sectionhead"><h2>Living Domain Specification</h2><p>As “regras malucas” que agora precisam sobreviver a qualquer refactor futuro.</p></div><div class="rulegrid"><article class="card rule"><div class="muted">RULE-001</div><h3>Profile ID é autoritativo</h3><p>clientId vence nome; manual só reconcilia por exact normalized match.</p></article><article class="card rule"><div class="muted">RULE-002</div><h3>Match manual nunca pode ser fuzzy</h3><p>Somente match exato após normalização.</p></article><article class="card rule"><div class="muted">RULE-003</div><h3>Ambiguidade não é resolvida silenciosamente</h3><p>Manual permanece separado; não escolher Profile arbitrariamente.</p></article><article class="card rule"><div class="muted">RULE-004</div><h3>sourceShiftId é per-Invoice</h3><p>Outra Invoice pode reutilizar conscientemente o mesmo Shift.</p></article><article class="card rule"><div class="muted">RULE-005</div><h3>Unassigned deve exigir ação explícita</h3><p>Calendar deve mostrar Unassigned como grupo próprio; escolher Profile nunca importa blank automaticamente.</p></article><article class="card rule"><div class="muted">RULE-006</div><h3>Blank pode continuar elegível dentro de Invoice já aberta</h3><p>Regra intencionalmente diferente do Calendar.</p></article><article class="card rule"><div class="muted">RULE-007</div><h3>Break desconta menor multiplier primeiro</h3><p>Manter ordem crescente de multiplier.</p></article><article class="card rule"><div class="muted">RULE-008</div><h3>Decimal hours só internamente</h3><p>UI/PDF exibem hora/minuto real.</p></article><article class="card rule"><div class="muted">RULE-009</div><h3>SERVICE substitui SITE/JOB quando representa serviço</h3><p>Usar SERVICE; Employee Invoice usa BASE RATE.</p></article><article class="card rule"><div class="muted">RULE-010</div><h3>Layout adapta densidade ao conteúdo</h3><p>comfortable/dense por contentWeight + proteção de page break.</p></article></div></section>
+
+<section id="audit">
+<div class="sectionhead"><h2>🔎 Super Auditoria de Qualidade de Código</h2><p>Claude Sonnet 5 + Gemini + ChatGPT GPT-5.6 Sol • análises independentes → consenso.</p></div>
+<div class="card audit"><h3>Objetivo</h3><p>Não procurar UI bugs primeiro. Procurar duplicação de regra, acoplamento, divergência semântica, risco de regressão e dívida criada durante a estabilização.</p>
+<h3>Caso de estudo já comprovado</h3><p><b>Calendar grouping vs Invoice eligibility:</b> Profile “ab” + manual “ab” eram representados de formas diferentes em duas camadas. Uma dizia “duas identidades”; outra dizia “elegíveis juntos”. Esse é exatamente o padrão que a auditoria deve procurar no resto do sistema.</p>
+<h3>Escala</h3><p><b>P0</b> data/financial integrity • <b>P1</b> high regression risk • <b>P2</b> architectural debt • <b>P3</b> cleanup</p>
+<h3>Foco</h3><ul><li>Invoice client loading/default resolution vs Quote client loading/default resolution</li><li>Expense client linking vs Invoice/Quote identity semantics</li><li>Agenda/Calendar manual-name fallback</li><li>Calendar → Invoice vs Generate from Shifts</li><li>Quote → Invoice mapping and snapshot preservation</li><li>Rate/overtime defaults duplicated across modules</li><li>Financial calculation duplication / double-counting risk</li><li>Global State coupling and hidden mutations</li><li>DOM orchestration mixed with domain logic</li><li>Persistence/localStorage scattered across modules</li><li>Dead/superseded functions after recent fixes</li><li>Structural/regex tests that should be runtime tests</li></ul></div>
 </section>
 
-<section id="e2e">
-  <div class="sectionHead"><h2>Employee Invoice Crazy E2E</h2><span class="badge pass-through-save-edit">PASS through Save/Edit</span></div>
-  <div class="hero">
-    <div class="card release"><span class="small">Baseline</span><strong>£980.00</strong><div class="small">34h30</div></div>
-    <div class="card release"><span class="small">Final tested fixture</span><strong>£1,690.00</strong><div class="small">34h30</div></div>
-  </div>
-  <div class="sectionHead"><h2>Passos</h2></div>
-  <div class="card progress"><div class="step">
-      <span class="dot pass"></span>
-      <div>Client Profile £20 + custom OT rules</div>
-      <div><span class="badge pass">pass</span></div>
-    </div><div class="step">
-      <span class="dot pass"></span>
-      <div>Shift A 06:00–10:00 = 4h00 / £90</div>
-      <div><span class="badge pass">pass</span></div>
-    </div><div class="step">
-      <span class="dot pass"></span>
-      <div>Shift B 16:00–23:00 = 7h00 / £200</div>
-      <div><span class="badge pass">pass</span></div>
-    </div><div class="step">
-      <span class="dot pass"></span>
-      <div>Shift C 06:00–23:00 + 60m break = 16h00 / £390</div>
-      <div><span class="badge pass">pass</span></div>
-    </div><div class="step">
-      <span class="dot pass"></span>
-      <div>Shift D 18:00–23:00 @ £30 = 5h00 / £240</div>
-      <div><span class="badge pass">pass</span></div>
-    </div><div class="step">
-      <span class="dot pass"></span>
-      <div>Shift E 06:00–09:00 + 30m break = 2h30 / £60</div>
-      <div><span class="badge pass">pass</span></div>
-    </div><div class="step">
-      <span class="dot pass"></span>
-      <div>Home aggregate = 34h30 / £980</div>
-      <div><span class="badge pass">pass</span></div>
-    </div><div class="step">
-      <span class="dot pass"></span>
-      <div>Starter row seeded from Client defaults</div>
-      <div><span class="badge pass">pass</span></div>
-    </div><div class="step">
-      <span class="dot pass"></span>
-      <div>Generate from Shifts shows exactly 5 eligible shifts</div>
-      <div><span class="badge pass">pass</span></div>
-    </div><div class="step">
-      <span class="dot pass"></span>
-      <div>Import preserves time/break/rate/OT/rules snapshots</div>
-      <div><span class="badge pass">pass</span></div>
-    </div><div class="step">
-      <span class="dot pass"></span>
-      <div>Duplicate protection hides already imported shifts</div>
-      <div><span class="badge pass">pass</span></div>
-    </div><div class="step">
-      <span class="dot pass"></span>
-      <div>Removing a row unlocks only that source shift</div>
-      <div><span class="badge pass">pass</span></div>
-    </div><div class="step">
-      <span class="dot pass"></span>
-      <div>Manual rate edit £20 → £40 recalculates Invoice £980 → £1,070</div>
-      <div><span class="badge pass">pass</span></div>
-    </div><div class="step">
-      <span class="dot pass"></span>
-      <div>Original standalone Shift remains unchanged</div>
-      <div><span class="badge pass">pass</span></div>
-    </div><div class="step">
-      <span class="dot pass"></span>
-      <div>Break edit to 30m recalculates £1,070 → £1,050</div>
-      <div><span class="badge pass">pass</span></div>
-    </div><div class="step">
-      <span class="dot pass"></span>
-      <div>Time edit to 06:00–23:00 recalculates to £1,690</div>
-      <div><span class="badge pass">pass</span></div>
-    </div><div class="step">
-      <span class="dot pass"></span>
-      <div>Save persists £1,690</div>
-      <div><span class="badge pass">pass</span></div>
-    </div><div class="step">
-      <span class="dot pass"></span>
-      <div>Save → Edit preserves 5 rows, rate £40, break, OT/rules and total</div>
-      <div><span class="badge pass">pass</span></div>
-    </div><div class="step">
-      <span class="dot pass"></span>
-      <div>sourceShiftId survives Save → Edit</div>
-      <div><span class="badge pass">pass</span></div>
-    </div><div class="step">
-      <span class="dot pending"></span>
-      <div>Preview / PDF parity</div>
-      <div><span class="badge pending">pending</span></div>
-    </div><div class="step">
-      <span class="dot pending"></span>
-      <div>Expenses inside Invoice</div>
-      <div><span class="badge pending">pending</span></div>
-    </div></div>
-</section>
-
-<section id="regras">
-  <div class="sectionHead"><h2>Regras de domínio confirmadas</h2></div>
-  <div class="rules"><article class="card rule"><div class="meta">R-01</div><h3>Profile ID is authoritative</h3><p>When profileId/clientId exists, Profile identity wins over editable text.</p></article><article class="card rule"><div class="meta">R-02</div><h3>Manual name is not Profile identity</h3><p>Exact normalized name matching may be used only for approved eligibility/read-only legacy compatibility.</p></article><article class="card rule"><div class="meta">R-03</div><h3>One client per Employee Invoice</h3><p>Protected employee rows must not be silently mixed across client identities.</p></article><article class="card rule"><div class="meta">R-04</div><h3>Historical snapshot wins</h3><p>Imported/existing rows preserve rate, overtime and rules; current client defaults seed new rows only.</p></article><article class="card rule"><div class="meta">R-05</div><h3>Break maximizes employee pay</h3><p>Break minutes are deducted from the lowest active multiplier bucket first.</p></article><article class="card rule"><div class="meta">R-06</div><h3>Decimal internally, formatted visually</h3><p>Financial math keeps decimal hours; UI uses hours/minutes formatting.</p></article><article class="card rule"><div class="meta">R-07</div><h3>Duplicate protection is per Invoice</h3><p>The same historical Shift may appear in multiple Invoices, but not twice in the same one.</p></article></div>
-</section>
-
-<section id="proximos">
-  <div class="sectionHead"><h2>Próximos cenários</h2></div>
-  <div class="list"><article class="card row"><div><div class="meta">NEXT-01</div><span class="badge next">next</span></div><div><h3>Preview / PDF parity for £1,690 fixture</h3><div class="meta">Invoice</div></div><div></div></article><article class="card row"><div><div class="meta">NEXT-02</div><span class="badge pending">pending</span></div><div><h3>Expense standalone behavior</h3><div class="meta">Expenses</div></div><div></div></article><article class="card row"><div><div class="meta">NEXT-03</div><span class="badge pending">pending</span></div><div><h3>Expense linking and no double counting</h3><div class="meta">Invoice + Expenses</div></div><div></div></article><article class="card row"><div><div class="meta">NEXT-04</div><span class="badge pending">pending</span></div><div><h3>Quote → Invoice E2E with client snapshots</h3><div class="meta">Quotes</div></div><div></div></article><article class="card row"><div><div class="meta">NEXT-05</div><span class="badge pending">pending</span></div><div><h3>Delete standalone Shift already imported into Invoice</h3><div class="meta">Calendar</div></div><div></div></article><article class="card row"><div><div class="meta">NEXT-06</div><span class="badge pending">pending</span></div><div><h3>21:00–06:00 with multiple OT bands and break</h3><div class="meta">Cross-midnight</div></div><div></div></article><article class="card row"><div><div class="meta">NEXT-07</div><span class="badge pending">pending</span></div><div><h3>Break longer than complete 1x bucket</h3><div class="meta">Long break</div></div><div></div></article><article class="card row"><div><div class="meta">NEXT-08</div><span class="badge pending">pending</span></div><div><h3>Legacy clientName edit preservation</h3><div class="meta">Agenda</div></div><div></div></article></div>
-</section>
+<section id="next"><div class="sectionhead"><h2>Próximos cenários</h2></div><article class="card next"><div><span class="badge next">NEXT</span></div><div><h3>Implementar/retestar grupo explícito Unassigned</h3><span class="muted">NEXT-01 • Calendar</span></div></article><article class="card next"><div><span class="badge pending">PENDING</span></div><div><h3>Retestar footer sem página órfã</h3><span class="muted">NEXT-02 • PDF</span></div></article><article class="card next"><div><span class="badge pending">PENDING</span></div><div><h3>Stress 15 rows / dense mode</h3><span class="muted">NEXT-03 • PDF</span></div></article><article class="card next"><div><span class="badge pending">PENDING</span></div><div><h3>Stress 30 rows / multi-page</h3><span class="muted">NEXT-04 • PDF</span></div></article><article class="card next"><div><span class="badge pending">PENDING</span></div><div><h3>Validar Expense standalone</h3><span class="muted">NEXT-05 • Expenses</span></div></article><article class="card next"><div><span class="badge pending">PENDING</span></div><div><h3>Linked Expenses, receipts e no-double-counting</h3><span class="muted">NEXT-06 • Invoice + Expenses</span></div></article><article class="card next"><div><span class="badge pending">PENDING</span></div><div><h3>Quote → Invoice E2E</h3><span class="muted">NEXT-07 • Quotes</span></div></article><article class="card next"><div><span class="badge ready">READY</span></div><div><h3>Super auditoria em 3 agentes + consenso</h3><span class="muted">NEXT-08 • Architecture</span></div></article><article class="card next"><div><span class="badge pending">PENDING</span></div><div><h3>Fixture determinístico de ~90 dias</h3><span class="muted">NEXT-09 • QA Infra</span></div></article></section>
 </main>
-
-<footer>Dashboard público estático • V2.1 sem dependência de JavaScript para renderização</footer>
-</body>
-</html>
+<footer>TempusMate QA Dashboard v4 • QA vivo + regras de domínio + release readiness</footer>
+</body></html>
