@@ -1,38 +1,19 @@
-# TempusMate QA & E2E Dashboard
+# TempusMate QA Dashboard v2
 
-Dashboard estático e sem dependências para acompanhar QA manual, E2E, bugs, decisões de domínio e dívida técnica.
+Dashboard público e estático para acompanhar estabilização, bugs, features/gaps, decisões de domínio e release readiness.
 
-## Estrutura
+Arquivos principais:
+- `index.html`
+- `styles.css`
+- `qa-data.js`
 
-- `index.html` — interface do dashboard
-- `styles.css` — estilos responsivos
-- `qa-data.js` — única fonte de dados do painel
+O dashboard calcula os contadores automaticamente a partir de `qa-data.js`.
 
-## Como usar no repositório
-
-Sugestão:
-
-```text
-docs/
-  qa/
-    index.html
-    styles.css
-    qa-data.js
+Publicação no GitHub Pages:
+```bash
+git add .
+git commit -m "feat: upgrade QA dashboard v2"
+git push
 ```
 
-Depois configure GitHub Pages para publicar a pasta `/docs` da branch desejada.
-
-## Fluxo sugerido para o futuro
-
-1. Achou um bug durante teste → adicionar em `bugs`.
-2. Corrigiu → mudar `status`, preencher `resolution` e `verification`.
-3. Executou cenário → adicionar em `executedTests`.
-4. Nova hipótese/teste → adicionar em `pendingScenarios`.
-5. Regra de negócio confirmada → adicionar em `rules`.
-6. Dívida descoberta mas fora de escopo → adicionar em `knownDebt`.
-
-A ideia é manter o dashboard como documentação viva e versionada junto com o código.
-
-## Observação
-
-O painel não possui backend. Toda informação vem de `qa-data.js`, então funciona em GitHub Pages e também ao abrir `index.html` localmente.
+Não publique tokens, endpoints privados, dumps ou dados reais de clientes.

@@ -1,128 +1,18 @@
 <!doctype html>
-<html lang="pt-BR">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TempusMate QA Dashboard</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-<header>
-  <div class="header-inner">
-    <div class="brand">
-      <h1>🧪 TempusMate QA & E2E</h1>
-      <p id="updated"></p>
-    </div>
-    <nav id="nav">
-      <button data-tab="overview" class="active">Resumo</button>
-      <button data-tab="bugs">Bugs</button>
-      <button data-tab="tests">Testes</button>
-      <button data-tab="pending">Próximos</button>
-      <button data-tab="rules">Regras</button>
-      <button data-tab="debt">Dívidas</button>
-    </nav>
-  </div>
-</header>
-
-<main>
-  <section id="overview" class="section active"></section>
-  <section id="bugs" class="section"></section>
-  <section id="tests" class="section"></section>
-  <section id="pending" class="section"></section>
-  <section id="rules" class="section"></section>
-  <section id="debt" class="section"></section>
-</main>
-
-<footer>
-  Dados versionados junto com o repositório. Atualize <code>qa-data.js</code> a cada rodada de teste/fix.
-</footer>
-
-<script src="qa-data.js"></script>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TempusMate QA & Release Readiness</title><link rel="stylesheet" href="styles.css"></head>
+<body><header><div class="header"><div class="brand"><h1>🧪 TempusMate QA & Release Readiness</h1><p id="updated"></p></div><nav id="nav"><button data-tab="executive" class="active">Executivo</button><button data-tab="history">Histórico</button><button data-tab="run">Último E2E</button><button data-tab="rules">Regras</button><button data-tab="next">Próximos</button></nav></div></header>
+<main><section id="executive" class="tab active"></section><section id="history" class="tab"></section><section id="run" class="tab"></section><section id="rules" class="tab"></section><section id="next" class="tab"></section></main>
+<footer>Dashboard estático versionado. Fonte única: <code>qa-data.js</code>.</footer><script src="qa-data.js"></script>
 <script>
-const d = window.QA_DATA;
-const money = n => new Intl.NumberFormat('en-GB',{style:'currency',currency:d.meta.baseline.currency}).format(n);
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const badge = (text, cls) => `<span class="badge ${cls}">${esc(text)}</span>`;
-
-document.getElementById('updated').textContent = `Atualizado em ${d.meta.updatedAt} • baseline ${d.meta.baseline.hours}h / ${money(d.meta.baseline.amount)}`;
-
-document.getElementById('nav').addEventListener('click', e => {
-  const btn = e.target.closest('button[data-tab]'); if (!btn) return;
-  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('active', b===btn));
-  document.querySelectorAll('.section').forEach(s => s.classList.toggle('active', s.id===btn.dataset.tab));
-});
-
-function renderOverview(){
-  const s=d.summary, b=d.meta.baseline;
-  document.getElementById('overview').innerHTML = `
-    <div class="hero">
-      <div class="card hero-main">
-        <h2>QA vivo, versionado e reaproveitável</h2>
-        <p>Um painel simples para acompanhar regressões, decisões de domínio, evidências manuais e cenários E2E sem depender de planilha estática.</p>
-      </div>
-      <div class="card baseline">
-        <span class="meta">Baseline E2E atual</span>
-        <strong>${b.hours}h · ${money(b.amount)}</strong>
-        <span class="meta">${esc(b.client)}</span>
-      </div>
-    </div>
-    <div class="grid">
-      ${[
-        ['Bugs',s.bugsCatalogued],['Resolvidos',s.resolvedOrImplemented],['Abertos',s.openOrPending],
-        ['Testes',s.testsExecuted],['Pendentes',s.pendingScenarios]
-      ].map(x=>`<div class="card metric"><span>${x[0]}</span><strong>${x[1]}</strong></div>`).join('')}
-    </div>
-    <div class="section-head"><h2>Baseline dos shifts</h2></div>
-    <div class="card"><table class="baseline-table">
-      <thead><tr><th>Shift</th><th>Horário</th><th>Break</th><th>Rate</th><th>Horas</th><th>Valor</th></tr></thead>
-      <tbody>${d.baselineShifts.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.time)}</td><td>${x.breakMinutes}m</td><td>${money(x.rate)}</td><td>${x.hours}h</td><td><strong>${money(x.amount)}</strong></td></tr>`).join('')}</tbody>
-    </table></div>`;
-}
-
-function renderBugs(){
-  const areas=[...new Set(d.bugs.map(x=>x.area))].sort();
-  document.getElementById('bugs').innerHTML = `
-    <div class="section-head"><h2>Bugs encontrados</h2>
-      <div class="toolbar">
-        <input id="bugSearch" type="search" placeholder="Buscar bug...">
-        <select id="bugStatus"><option value="">Todos status</option><option value="open">Aberto</option><option value="resolved">Resolvido</option><option value="implemented">Implementado</option></select>
-        <select id="bugArea"><option value="">Todas áreas</option>${areas.map(a=>`<option>${esc(a)}</option>`).join('')}</select>
-      </div>
-    </div><div id="bugList" class="list"></div>`;
-  const paint=()=>{
-    const q=document.getElementById('bugSearch').value.toLowerCase(), st=document.getElementById('bugStatus').value, ar=document.getElementById('bugArea').value;
-    const rows=d.bugs.filter(x=>(!q||JSON.stringify(x).toLowerCase().includes(q))&&(!st||x.status===st)&&(!ar||x.area===ar));
-    document.getElementById('bugList').innerHTML = rows.length ? rows.map(x=>`
-      <article class="card item">
-        <div><div class="meta">${esc(x.id)}</div>${badge(x.severity,x.severity.toLowerCase())}</div>
-        <div><h3>${esc(x.title)}</h3><div class="meta">${esc(x.area)}</div><p>${esc(x.description)}</p><p><strong>Correção/regra:</strong> ${esc(x.resolution)}</p><p><strong>Verificação:</strong> ${esc(x.verification)}</p></div>
-        <div>${badge(x.status,x.status)}</div>
-      </article>`).join('') : `<div class="card empty">Nenhum bug encontrado.</div>`;
-  };
-  ['bugSearch','bugStatus','bugArea'].forEach(id=>document.getElementById(id).addEventListener('input',paint)); paint();
-}
-
-function renderTests(){
-  document.getElementById('tests').innerHTML = `<div class="section-head"><h2>Testes executados</h2></div><div class="list">${
-    d.executedTests.map(x=>`<article class="card item"><div><div class="meta">${esc(x.id)}</div>${badge(x.status,x.status)}</div><div><h3>${esc(x.scenario)}</h3><div class="meta">${esc(x.area)}</div><p>${esc(x.result)}</p></div><div></div></article>`).join('')
-  }</div>`;
-}
-function renderPending(){
-  document.getElementById('pending').innerHTML = `<div class="section-head"><h2>Próximos cenários</h2></div><div class="list">${
-    d.pendingScenarios.map(x=>`<article class="card item"><div><div class="meta">${esc(x.id)}</div>${badge(x.status,x.status)}</div><div><h3>${esc(x.title)}</h3><div class="meta">${esc(x.area)}</div><p>${esc(x.expectation)}</p></div><div></div></article>`).join('')
-  }</div>`;
-}
-function renderRules(){
-  document.getElementById('rules').innerHTML = `<div class="section-head"><h2>Regras de domínio confirmadas</h2></div><div class="rules">${
-    d.rules.map(x=>`<article class="card rule"><div class="meta">${esc(x.id)}</div><h3>${esc(x.title)}</h3><p>${esc(x.text)}</p></article>`).join('')
-  }</div>`;
-}
-function renderDebt(){
-  document.getElementById('debt').innerHTML = `<div class="section-head"><h2>Dívidas / follow-ups conhecidos</h2></div><div class="list">${
-    d.knownDebt.map(x=>`<article class="card item"><div><div class="meta">${esc(x.id)}</div>${badge(x.status,x.status.replace(/\s+/g,'-'))}</div><div><h3>${esc(x.title)}</h3><p>${esc(x.detail)}</p></div><div></div></article>`).join('')
-  }</div>`;
-}
-renderOverview(); renderBugs(); renderTests(); renderPending(); renderRules(); renderDebt();
-</script>
-</body>
-</html>
+const d=window.QA_DATA,esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),cls=s=>String(s).toLowerCase().replace(/\s+/g,'-'),badge=s=>`<span class="badge ${cls(s)}">${esc(s)}</span>`,items=d.masterItems,bugs=items.filter(x=>x.type==='BUG'),resolvedBugs=bugs.filter(x=>x.status==='resolved').length,openBugs=bugs.filter(x=>x.status!=='resolved').length,fixedLike=items.filter(x=>['resolved','implemented'].includes(x.status)).length;
+updated.textContent=`Atualizado em ${d.meta.updatedAt} • ${d.meta.releaseStatus}`;
+nav.onclick=e=>{const b=e.target.closest('button[data-tab]');if(!b)return;document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.id===b.dataset.tab));};
+executive.innerHTML=`<div class="hero"><div class="card heroMain"><h2>${esc(d.meta.headline)}</h2><p>${esc(d.executive.poMessage)}</p></div><div class="card release"><span class="small">Release readiness</span><strong>${esc(d.meta.releaseStatus)}</strong>${badge('warning')}<p class="small">${esc(d.executive.manualRunStatus)} • ${esc(d.executive.latestBuild)} build</p></div></div>
+<div class="metrics"><div class="card metric"><span>Confirmed bugs</span><strong>${bugs.length}</strong></div><div class="card metric"><span>Resolved bugs</span><strong>${resolvedBugs}</strong></div><div class="card metric"><span>Open / verify</span><strong>${openBugs}</strong></div><div class="card metric"><span>Automated tests</span><strong>${d.executive.automatedTests}</strong></div><div class="card metric"><span>Automated failures</span><strong>${d.executive.automatedFailures}</strong></div></div>
+<div class="kpiStrip"><div class="card progress"><h3>Último E2E</h3><div class="small">${esc(d.latestRun.title)}</div><strong style="display:block;font-size:1.6rem;margin:8px 0">${esc(d.latestRun.final.amount)}</strong><div class="small">${esc(d.latestRun.final.hours)} • ${esc(d.latestRun.status)}</div></div><div class="card callout"><strong>Validação ainda restante</strong>${d.meta.remainingValidation.map(x=>`<div>• ${esc(x)}</div>`).join('')}</div></div>
+<div class="sectionHead"><h2>Distribuição do trabalho de estabilização</h2></div><div class="metrics">${['BUG','FEATURE / GAP','TECH DEBT','PRODUCT DECISION'].map(t=>`<div class="card metric"><span>${esc(t)}</span><strong>${items.filter(x=>x.type===t).length}</strong></div>`).join('')}<div class="card metric"><span>Resolved / implemented items</span><strong>${fixedLike}</strong></div></div>`;
+function renderHistory(){const types=[...new Set(items.map(x=>x.type))],areas=[...new Set(items.map(x=>x.area))].sort();history.innerHTML=`<div class="sectionHead"><h2>Master stabilization history</h2><div class="toolbar"><input id="q" type="search" placeholder="Buscar..."><select id="type"><option value="">Todos tipos</option>${types.map(x=>`<option>${esc(x)}</option>`).join('')}</select><select id="status"><option value="">Todos status</option>${[...new Set(items.map(x=>x.status))].map(x=>`<option>${esc(x)}</option>`).join('')}</select><select id="area"><option value="">Todas áreas</option>${areas.map(x=>`<option>${esc(x)}</option>`).join('')}</select></div></div><div id="historyList" class="list"></div>`;const paint=()=>{const qv=q.value.toLowerCase(),tv=type.value,sv=status.value,av=area.value,rows=items.filter(x=>(!qv||JSON.stringify(x).toLowerCase().includes(qv))&&(!tv||x.type===tv)&&(!sv||x.status===sv)&&(!av||x.area===av));historyList.innerHTML=rows.map(x=>`<article class="card row"><div><div class="meta">${esc(x.id)}</div>${badge(x.severity)}<div style="margin-top:6px">${badge(x.type)}</div></div><div><h3>${esc(x.title)}</h3><div class="meta">${esc(x.area)}</div><p>${esc(x.detail)}</p><p><strong>Resolution / state:</strong> ${esc(x.resolution)}</p></div><div>${badge(x.status)}</div></article>`).join('')||'<div class="card row">Nenhum item.</div>';};['q','type','status','area'].forEach(id=>document.getElementById(id).addEventListener('input',paint));paint();}renderHistory();
+run.innerHTML=`<div class="sectionHead"><h2>${esc(d.latestRun.title)}</h2>${badge(d.latestRun.status)}</div><div class="hero"><div class="card release"><span class="small">Baseline</span><strong>${esc(d.latestRun.baseline.amount)}</strong><div class="small">${esc(d.latestRun.baseline.hours)}</div></div><div class="card release"><span class="small">Final tested fixture</span><strong>${esc(d.latestRun.final.amount)}</strong><div class="small">${esc(d.latestRun.final.hours)}</div></div></div><div class="sectionHead"><h2>Passos</h2></div><div class="card progress">${d.latestRun.steps.map(x=>`<div class="step"><span class="dot ${cls(x.status)}"></span><div>${esc(x.name)}</div><div>${badge(x.status)}</div></div>`).join('')}</div>`;
+rules.innerHTML=`<div class="sectionHead"><h2>Regras de domínio confirmadas</h2></div><div class="rules">${d.rules.map(x=>`<article class="card rule"><div class="meta">${esc(x.id)}</div><h3>${esc(x.title)}</h3><p>${esc(x.text)}</p></article>`).join('')}</div>`;
+next.innerHTML=`<div class="sectionHead"><h2>Próximos cenários</h2></div><div class="list">${d.nextScenarios.map(x=>`<article class="card row"><div><div class="meta">${esc(x.id)}</div>${badge(x.status)}</div><div><h3>${esc(x.title)}</h3><div class="meta">${esc(x.area)}</div></div><div></div></article>`).join('')}</div>`;
+</script></body></html>

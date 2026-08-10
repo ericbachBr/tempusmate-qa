@@ -1,453 +1,523 @@
 window.QA_DATA = {
   "meta": {
     "project": "TempusMate",
-    "title": "QA & E2E Dashboard",
+    "title": "QA, Stabilization & Release Readiness",
+    "version": "2.0",
     "updatedAt": "2026-08-09",
-    "baseline": {
-      "client": "E2E Crazy Client",
-      "hours": 32,
-      "amount": 920,
-      "currency": "GBP",
-      "note": "Baseline before advanced Invoice mutations/extras."
-    }
+    "releaseStatus": "E2E in progress",
+    "releaseTone": "warning",
+    "headline": "Core Employee Invoice flow validated through Save → Edit with complex overtime/rate scenarios.",
+    "remainingValidation": [
+      "Invoice Preview / PDF parity",
+      "Expense module and Expense ↔ Invoice integration",
+      "Quote/Service follow-up scenarios",
+      "Cross-midnight and long-break edge cases"
+    ]
   },
-  "summary": {
-    "bugsCatalogued": 10,
-    "resolvedOrImplemented": 9,
-    "openOrPending": 1,
-    "testsExecuted": 10,
-    "pendingScenarios": 21
+  "executive": {
+    "automatedTests": 448,
+    "automatedFailures": 0,
+    "latestBuild": "Clean",
+    "manualRunStatus": "PASS through Save/Edit",
+    "poMessage": "A versão ainda está em estabilização ativa. Vários bugs de integridade financeira e identidade foram encontrados e corrigidos antes de liberar uma nova build para teste externo."
   },
-  "rules": [
+  "masterItems": [
     {
-      "id": "RULE-CLIENT-01",
-      "title": "Profile identity wins",
-      "text": "When profileId/clientId exists, it is the authoritative client identity. Editable text must not override it."
-    },
-    {
-      "id": "RULE-CLIENT-02",
-      "title": "Manual name is not Profile identity",
-      "text": "Exact normalized name matching may be used for approved eligibility/read-only compatibility, but must never create or persist Profile identity."
-    },
-    {
-      "id": "RULE-INVOICE-01",
-      "title": "One client per Invoice",
-      "text": "An employee Invoice must not mix protected rows from different client identities."
-    },
-    {
-      "id": "RULE-SNAPSHOT-01",
-      "title": "Historical financial snapshot",
-      "text": "Imported/existing rows preserve rate, overtime and rules. Current Client defaults seed new rows only."
-    },
-    {
-      "id": "RULE-BREAK-01",
-      "title": "Break allocation",
-      "text": "Unpaid break minutes are deducted from the lowest active multiplier bucket first, then the next-lowest bucket if needed."
-    },
-    {
-      "id": "RULE-DURATION-01",
-      "title": "Decimal internally, clock format visually",
-      "text": "Financial calculations keep decimal hours internally; user-facing durations use the shared hours/minutes formatter."
-    },
-    {
-      "id": "RULE-IMPORT-01",
-      "title": "Duplicate protection is per Invoice",
-      "text": "The same historical Shift may appear in multiple different Invoices, but must not be imported twice into the same Invoice."
-    }
-  ],
-  "bugs": [
-    {
-      "id": "BUG-01",
+      "id": "BUG-001",
+      "type": "BUG",
       "area": "Invoice / Client",
       "severity": "HIGH",
       "status": "resolved",
-      "title": "Client change repriced existing rows",
-      "description": "Changing/reselecting a Client rewrote rate, overtime and rules on existing/imported rows.",
-      "resolution": "Existing rows became protected snapshots. Client defaults now govern new rows only.",
-      "verification": "Manual regression passed."
+      "title": "Troca/reseleção de cliente reprecificava rows existentes",
+      "detail": "Existing/imported employee rows recebiam novamente rate, overtime e regras do Client Profile, destruindo snapshots históricos.",
+      "resolution": "Rows existentes passaram a ser snapshots protegidos; defaults do cliente só semeiam novas rows."
     },
     {
-      "id": "BUG-02",
+      "id": "BUG-002",
+      "type": "BUG",
       "area": "Invoice / Import",
       "severity": "HIGH",
       "status": "resolved",
-      "title": "Import Shifts ignored Invoice client",
-      "description": "The selector could expose shifts from unrelated clients.",
-      "resolution": "Eligibility now uses Profile identity first, supports approved exact manual-name matching, and includes truly blank-client shifts.",
-      "verification": "Manual Itau/Santander/Profile/manual/blank matrix passed."
+      "title": "Import Shifts sem consciência do cliente da Invoice",
+      "detail": "O seletor podia listar turnos de outros clientes.",
+      "resolution": "Predicate de elegibilidade passou a respeitar profileId, nome manual exato e shifts realmente sem cliente."
     },
     {
-      "id": "BUG-03",
+      "id": "BUG-003",
+      "type": "BUG",
       "area": "Invoice / Identity",
       "severity": "MEDIUM",
       "status": "resolved",
-      "title": "Manual Invoice name missed matching Profile-linked shifts",
-      "description": "An Invoice manually typed as 'Itau' excluded shifts formally linked to the Itau Profile.",
-      "resolution": "For eligibility only, manual Invoice names can match a linked Profile's current name exactly without creating Profile identity.",
-      "verification": "Manual regression passed."
+      "title": "Invoice manual 'Itau' não via shift do Profile Itau",
+      "detail": "Nome manual equivalente ao Profile era excluído do filtro.",
+      "resolution": "Match exato de nome é aceito somente para elegibilidade; não cria Profile identity."
     },
     {
-      "id": "BUG-04",
+      "id": "BUG-004",
+      "type": "BUG",
       "area": "Invoice / Identity",
       "severity": "HIGH",
       "status": "resolved",
-      "title": "Selected Profile + edited text created hybrid identity",
-      "description": "After selecting Santander, manually editing the Client Name to Itau produced a mixed shift subset.",
-      "resolution": "When profileId exists, the selected Profile is the sole eligibility authority.",
-      "verification": "Manual Santander/Itau conflict regression passed."
+      "title": "Profile selecionado + texto editado criava identidade híbrida",
+      "detail": "Selecionar Santander e editar o texto para Itau misturava resultados.",
+      "resolution": "Com profileId presente, Profile é a única autoridade de elegibilidade."
     },
     {
-      "id": "BUG-05",
+      "id": "BUG-005",
+      "type": "BUG",
       "area": "Invoice / Client",
       "severity": "HIGH",
       "status": "resolved",
-      "title": "Client could change with protected rows",
-      "description": "An Invoice could retain ITAU rows and then import Santander rows after switching client.",
-      "resolution": "Client switching is blocked when protected employee rows already exist; the previous selection is restored.",
-      "verification": "Automated suite + manual behavior confirmed."
+      "title": "Era possível trocar cliente com shifts já preenchidos",
+      "detail": "Permitiria misturar ITAU + Santander na mesma Invoice.",
+      "resolution": "Troca é bloqueada quando existem employee rows protegidas."
     },
     {
-      "id": "BUG-06",
+      "id": "BUG-006",
+      "type": "BUG",
       "area": "Invoice / Add Shift",
       "severity": "HIGH",
       "status": "resolved",
-      "title": "New manual row did not receive Client hourly rate",
-      "description": "The + Add Shift caller omitted effectiveHourlyRate.",
-      "resolution": "effectiveHourlyRate is forwarded, reset for new Invoice sessions and re-derived on edit.",
-      "verification": "Automated suite green; manual flow previously confirmed."
+      "title": "Nova row manual não recebia hourlyRate do cliente",
+      "detail": "O caller de + Add Shift omitía effectiveHourlyRate.",
+      "resolution": "Rate efetivo passou a ser encaminhado; estado é resetado/rederivado ao abrir/editar."
     },
     {
-      "id": "BUG-07",
+      "id": "BUG-007",
+      "type": "BUG",
       "area": "Calendar / Shift",
       "severity": "HIGH",
       "status": "resolved",
-      "title": "Delete Shift confirmed but did nothing",
-      "description": "deleteShiftFromHistory called undefined saveState(), aborting before persistence and re-render.",
-      "resolution": "Uses saveHistoryToLocalStorage(). Saved Invoice snapshots remain independent.",
-      "verification": "Manual deletion passed."
+      "title": "Delete Shift confirmava mas não apagava",
+      "detail": "deleteShiftFromHistory chamava saveState() inexistente e abortava antes da persistência/render.",
+      "resolution": "Passou a usar saveHistoryToLocalStorage()."
     },
     {
-      "id": "BUG-08",
+      "id": "BUG-008",
+      "type": "BUG",
       "area": "Invoice / Starter Row",
       "severity": "MEDIUM",
-      "status": "implemented",
-      "title": "Blank starter row did not receive Client defaults",
-      "description": "The initial empty employee row existed before Client selection and was skipped by snapshot-protection logic.",
-      "resolution": "Only the single truly blank starter row is replaced/reseeded with the same defaults as + Add Shift Row.",
-      "verification": "444/444 automated tests; manual retest still pending."
+      "status": "resolved",
+      "title": "Starter row vazia não recebia defaults do Client",
+      "detail": "A row inicial existia antes da seleção do cliente e ficou sem rate/OT/regras após snapshot protection.",
+      "resolution": "A única starter row realmente vazia é resemeada com os mesmos defaults de + Add Shift Row."
     },
     {
-      "id": "BUG-09",
+      "id": "BUG-009",
+      "type": "BUG",
       "area": "UI / Duration",
       "severity": "MEDIUM",
       "status": "resolved",
-      "title": "Decimal-hour UI formatting",
-      "description": "Durations were shown as 2.50h instead of hours/minutes.",
-      "resolution": "UI surfaces now use formatHoursMinutes(); internal decimal-hour math/storage remains unchanged.",
-      "verification": "444/444 automated tests; visual smoke will happen naturally in E2E."
+      "title": "Horas decimais exibidas como duração",
+      "detail": "Ex.: 2.50h era exibido diretamente em várias superfícies.",
+      "resolution": "UI passou a usar formatHoursMinutes(); matemática/storage continuam em decimal."
     },
     {
-      "id": "BUG-10",
+      "id": "BUG-010",
+      "type": "BUG",
       "area": "Invoice / Import",
       "severity": "HIGH",
-      "status": "open",
-      "title": "Same Shift can be reimported into the same Invoice",
-      "description": "Reopening Generate from Shifts still exposes shifts already imported into the current Invoice.",
-      "resolution": "Planned: persist sourceShiftId on imported rows and exclude IDs already present in the currently open Invoice only.",
-      "verification": "Reproduced manually. Cross-Invoice reuse must remain allowed."
-    }
-  ],
-  "executedTests": [
+      "status": "resolved",
+      "title": "Mesmo Shift podia ser importado várias vezes na mesma Invoice",
+      "detail": "Reabrir Generate from Shifts mostrava novamente shifts já importados.",
+      "resolution": "sourceShiftId é persistido por row/Invoice e o selector exclui apenas IDs já presentes na Invoice ativa."
+    },
     {
-      "id": "T-01",
+      "id": "BUG-011",
+      "type": "BUG",
+      "area": "Quote / Client",
+      "severity": "HIGH",
+      "status": "resolved",
+      "title": "Detach de Client Profile deixava campos antigos na Quote",
+      "detail": "Ao remover o profile, apenas o badge era limpo; dados derivados permaneciam.",
+      "resolution": "Blank branch passou a limpar os 5 campos derivados."
+    },
+    {
+      "id": "BUG-012",
+      "type": "BUG",
+      "area": "Quote / Identity",
+      "severity": "HIGH",
+      "status": "resolved",
+      "title": "Quote fazia relink por nome ao editar",
+      "detail": "loadQuoteIntoForm usava comparação de nome e podia associar perfil errado.",
+      "resolution": "Restore do dropdown passou a usar profileId exclusivamente."
+    },
+    {
+      "id": "BUG-013",
+      "type": "BUG",
+      "area": "Quote / Identity",
+      "severity": "HIGH",
+      "status": "resolved",
+      "title": "Quote não persistia profileId",
+      "detail": "Não havia como distinguir entrada manual de cliente derivado de Profile.",
+      "resolution": "Quote passou a persistir profileId e snapshot de identidade."
+    },
+    {
+      "id": "BUG-014",
+      "type": "BUG",
+      "area": "Quote / Client",
+      "severity": "MEDIUM",
+      "status": "resolved",
+      "title": "Quote lia contactPerson em vez de contact do Profile",
+      "detail": "Contact Person ficava vazio ao carregar Client Profile.",
+      "resolution": "Boundary Profile → Quote usa client.contact; snapshot Quote continua contactPerson."
+    },
+    {
+      "id": "BUG-015",
+      "type": "BUG",
+      "area": "Quote → Invoice",
+      "severity": "HIGH",
+      "status": "resolved",
+      "title": "Conversão não preservava identidade do cliente",
+      "detail": "Invoice convertida perdia vínculo explícito do Profile depois que name fallback foi removido.",
+      "resolution": "Quote → Invoice carrega profileId do snapshot."
+    },
+    {
+      "id": "BUG-016",
+      "type": "BUG",
+      "area": "Quote → Invoice",
+      "severity": "HIGH",
+      "status": "resolved",
+      "title": "B2B/VAT/country não existiam no snapshot da Quote",
+      "detail": "Invoice convertida podia declarar Profile mas carregar defaults B2C/GB/vazio inconsistentes.",
+      "resolution": "Quote captura isBusiness/vatNumber/country no Save e conversão usa apenas snapshot."
+    },
+    {
+      "id": "BUG-017",
+      "type": "BUG",
+      "area": "Invoice / Totals",
+      "severity": "HIGH",
+      "status": "known",
+      "title": "toggleInvoicePaid podia deixar calcFees desatualizado",
+      "detail": "Finding histórico identificado durante auditoria anterior: mudar Paid podia congelar total calculado incorretamente.",
+      "resolution": "Mantido no histórico como finding prévio; confirmar status atual antes de marcar como fechado."
+    },
+    {
+      "id": "BUG-018",
+      "type": "BUG",
+      "area": "Invoice / Overtime",
+      "severity": "HIGH",
+      "status": "resolved",
+      "title": "Troca de cliente não recalculava corretamente configuração de overtime",
+      "detail": "Gap original do ciclo de estabilização; depois evoluiu para política de snapshot e defaults por cliente.",
+      "resolution": "Regra consolidada: existentes preservam snapshot; novas rows recebem defaults do cliente atual."
+    },
+    {
+      "id": "GAP-001",
+      "type": "FEATURE / GAP",
+      "area": "PDF",
+      "severity": "MEDIUM",
+      "status": "planned",
+      "title": "Recibos no PDF",
+      "detail": "Item original de estabilização: comprovantes/recibos não apareciam no PDF.",
+      "resolution": "Pendência histórica / validar implementação atual."
+    },
+    {
+      "id": "GAP-002",
+      "type": "FEATURE / GAP",
+      "area": "PDF",
+      "severity": "MEDIUM",
+      "status": "planned",
+      "title": "Descrição financeira de extras no PDF",
+      "detail": "Item original de estabilização: descrição de extras precisava aparecer no PDF.",
+      "resolution": "Validar no bloco Preview/PDF."
+    },
+    {
+      "id": "GAP-003",
+      "type": "FEATURE / GAP",
       "area": "Client Profile",
-      "scenario": "E2E client with £20 hourly rate + custom OT rules",
-      "status": "pass",
-      "result": "Baseline client created."
+      "severity": "MEDIUM",
+      "status": "implemented",
+      "title": "Hourly rate por cliente",
+      "detail": "Cliente pode definir rate padrão para novas employee rows.",
+      "resolution": "Implementado e validado no E2E atual."
     },
     {
-      "id": "T-02",
-      "area": "Shift A",
-      "scenario": "06:00–10:00, no break, £20",
-      "status": "pass",
-      "result": "4h / £90"
+      "id": "GAP-004",
+      "type": "FEATURE / GAP",
+      "area": "Overtime",
+      "severity": "LOW",
+      "status": "implemented",
+      "title": "Remover overrides fixos 1.5x/2x/3x",
+      "detail": "Simplificação para usar regras configuradas em vez de overrides soltos.",
+      "resolution": "Integrado ao fluxo atual de regras."
     },
     {
-      "id": "T-03",
-      "area": "Shift B",
-      "scenario": "16:00–23:00, no break, £20",
-      "status": "pass",
-      "result": "7h / £200"
+      "id": "GAP-005",
+      "type": "FEATURE / GAP",
+      "area": "Invoice UI",
+      "severity": "LOW",
+      "status": "implemented",
+      "title": "Live breakdown",
+      "detail": "Necessidade de breakdown ao vivo durante edição de Invoice.",
+      "resolution": "Presente no fluxo atual; ainda precisa cobertura runtime mais forte."
     },
     {
-      "id": "T-04",
-      "area": "Shift C",
-      "scenario": "06:00–23:00, 60m break, £20",
-      "status": "pass",
-      "result": "16h / £390"
+      "id": "GAP-006",
+      "type": "FEATURE / GAP",
+      "area": "Profile",
+      "severity": "LOW",
+      "status": "implemented",
+      "title": "Load Profile / dados do usuário",
+      "detail": "Fluxo de carregar dados do próprio usuário no formulário.",
+      "resolution": "Implementado anteriormente."
     },
     {
-      "id": "T-05",
-      "area": "Break policy",
-      "scenario": "Break across multiple OT multipliers",
-      "status": "pass",
-      "result": "Lowest multiplier bucket is consumed first."
+      "id": "GAP-007",
+      "type": "FEATURE / GAP",
+      "area": "Invoice UI",
+      "severity": "LOW",
+      "status": "implemented",
+      "title": "Redesign lista + modal",
+      "detail": "Reorganização de UX de Invoice/rows.",
+      "resolution": "Implementado em etapas; Home experiment foi mantido minimalista."
     },
     {
-      "id": "T-06",
-      "area": "Shift D",
-      "scenario": "18:00–23:00, no break, manual £30",
-      "status": "pass",
-      "result": "5h / £240"
+      "id": "DEBT-001",
+      "type": "TECH DEBT",
+      "area": "Overtime",
+      "severity": "MEDIUM",
+      "status": "deferred",
+      "title": "rules: [] pode cair em State.defaultRules live",
+      "detail": "Registro histórico sem regras explícitas ainda pode resolver defaults atuais.",
+      "resolution": "Documentado como follow-up separado."
     },
     {
-      "id": "T-07",
-      "area": "Home Summary",
-      "scenario": "Aggregate four E2E shifts",
-      "status": "pass",
-      "result": "32h / £920"
+      "id": "DEBT-002",
+      "type": "TECH DEBT",
+      "area": "Tests",
+      "severity": "HIGH",
+      "status": "deferred",
+      "title": "Testes regex/source-level demais",
+      "detail": "Alguns testes verificam strings/código-fonte em vez de executar DOM/runtime real.",
+      "resolution": "Manter como guarda temporária; aumentar JSDOM/E2E gradualmente."
     },
     {
-      "id": "T-08",
-      "area": "Invoice Filter",
-      "scenario": "Generate from Shifts for E2E client",
-      "status": "pass",
-      "result": "Exactly the 4 eligible shifts were shown."
-    },
-    {
-      "id": "T-09",
-      "area": "Invoice Import",
-      "scenario": "Import all four E2E shifts",
-      "status": "pass",
-      "result": "Times, break, rates and OT snapshots preserved; Shift D stayed £30."
-    },
-    {
-      "id": "T-10",
-      "area": "Duplicate Import",
-      "scenario": "Reopen Generate from Shifts after import",
-      "status": "fail",
-      "result": "Same 4 shifts remained selectable in the same Invoice."
-    }
-  ],
-  "baselineShifts": [
-    {
-      "name": "Shift A",
-      "time": "06:00–10:00",
-      "breakMinutes": 0,
-      "rate": 20,
-      "hours": 4,
-      "amount": 90
-    },
-    {
-      "name": "Shift B",
-      "time": "16:00–23:00",
-      "breakMinutes": 0,
-      "rate": 20,
-      "hours": 7,
-      "amount": 200
-    },
-    {
-      "name": "Shift C",
-      "time": "06:00–23:00",
-      "breakMinutes": 60,
-      "rate": 20,
-      "hours": 16,
-      "amount": 390
-    },
-    {
-      "name": "Shift D",
-      "time": "18:00–23:00",
-      "breakMinutes": 0,
-      "rate": 30,
-      "hours": 5,
-      "amount": 240
-    }
-  ],
-  "pendingScenarios": [
-    {
-      "id": "P-01",
-      "area": "Invoice E2E",
-      "title": "Confirm total after importing 4 shifts",
-      "status": "next",
-      "expectation": "32h / £920 before extras."
-    },
-    {
-      "id": "P-02",
-      "area": "Invoice E2E",
-      "title": "Edit rate manually on an imported row",
-      "status": "pending",
-      "expectation": "Only that row and aggregate total recalculate."
-    },
-    {
-      "id": "P-03",
-      "area": "Invoice E2E",
-      "title": "Edit times/break on an imported row",
-      "status": "pending",
-      "expectation": "Live OT breakdown and total update correctly."
-    },
-    {
-      "id": "P-04",
-      "area": "Invoice E2E",
-      "title": "Add manual row using Client defaults",
-      "status": "pending",
-      "expectation": "£20 + OT enabled + 4 Client rules."
-    },
-    {
-      "id": "P-05",
-      "area": "Invoice E2E",
-      "title": "Add Extra Fee",
-      "status": "pending",
-      "expectation": "Included once; no double counting."
-    },
-    {
-      "id": "P-06",
-      "area": "Invoice E2E",
-      "title": "Save and reopen Edit",
-      "status": "pending",
-      "expectation": "Snapshots, rates, OT, rules and totals survive round-trip."
-    },
-    {
-      "id": "P-07",
-      "area": "Invoice E2E",
-      "title": "Preview / PDF",
-      "status": "pending",
-      "expectation": "Values match form/live breakdown."
-    },
-    {
-      "id": "P-08",
-      "area": "Invoice E2E",
-      "title": "Share / Export",
-      "status": "pending",
-      "expectation": "Hours, values and extras stay consistent."
-    },
-    {
-      "id": "P-09",
-      "area": "Duplicate Protection",
-      "title": "Imported Shift disappears from same Invoice selector",
-      "status": "pending",
-      "expectation": "Per-Invoice duplicate protection."
-    },
-    {
-      "id": "P-10",
-      "area": "Duplicate Protection",
-      "title": "Remove imported row -> Shift becomes selectable again",
-      "status": "pending",
-      "expectation": "No global consumed flag."
-    },
-    {
-      "id": "P-11",
-      "area": "Duplicate Protection",
-      "title": "Same Shift remains available to a different Invoice",
-      "status": "pending",
-      "expectation": "Cross-Invoice reuse remains allowed."
-    },
-    {
-      "id": "P-12",
-      "area": "Duplicate Protection",
-      "title": "Two identical-looking shifts with different IDs",
-      "status": "pending",
-      "expectation": "Both remain independently importable."
-    },
-    {
-      "id": "P-13",
-      "area": "Starter Row",
-      "title": "Retest blank starter row after Client selection",
-      "status": "pending",
-      "expectation": "Starter receives rate/OT/rules."
-    },
-    {
-      "id": "P-14",
-      "area": "Client Guard",
-      "title": "Try client switch with populated row",
-      "status": "pending",
-      "expectation": "Blocked/reverted without mutation."
-    },
-    {
-      "id": "P-15",
-      "area": "Duration UI",
-      "title": "Visual smoke of hours/minutes formatting",
-      "status": "pending",
-      "expectation": "UI uses hours/minutes; internal math remains decimal."
-    },
-    {
-      "id": "P-16",
-      "area": "Quotes",
-      "title": "Quote with client -> convert to Invoice",
-      "status": "pending",
-      "expectation": "Identity and snapshots preserved."
-    },
-    {
-      "id": "P-17",
+      "id": "DEBT-003",
+      "type": "TECH DEBT",
       "area": "Expenses",
-      "title": "Expense linked to client/Invoice",
-      "status": "pending",
-      "expectation": "Correct identity + no double counting."
+      "severity": "MEDIUM",
+      "status": "follow-up",
+      "title": "Premissas antigas sobre clientId de Invoice",
+      "detail": "Expense ainda contém lógica/comentários anteriores ao invoice.client.profileId.",
+      "resolution": "Auditar quando entrar no bloco Expenses."
     },
     {
-      "id": "P-18",
+      "id": "DEBT-004",
+      "type": "TECH DEBT",
       "area": "Agenda",
-      "title": "Legacy client-name edit preservation",
-      "status": "pending",
-      "expectation": "Read-only fallback stays safe; editing legacy data does not lose names."
+      "severity": "MEDIUM",
+      "status": "follow-up",
+      "title": "Edit de evento legado pode perder clientName",
+      "detail": "Fallback por nome é read-only e seguro, mas edição de legado sem clientId pode apagar nome antigo.",
+      "resolution": "Investigar no bloco Agenda."
     },
     {
-      "id": "P-19",
+      "id": "DEBT-005",
+      "type": "TECH DEBT",
+      "area": "Quote",
+      "severity": "MEDIUM",
+      "status": "deferred",
+      "title": "Double conversion sem guarda state-side",
+      "detail": "UI impede em parte, mas idempotência formal de Quote → Invoice segue como decisão futura.",
+      "resolution": "Finding separado."
+    },
+    {
+      "id": "DEBT-006",
+      "type": "PRODUCT DECISION",
+      "area": "Service Invoice",
+      "severity": "LOW",
+      "status": "open",
+      "title": "Hourly rate de Client Profile em Service Invoice",
+      "detail": "Hoje rate/OT do Profile é escopo de employee shift; service/Quote trabalha por quantidade/preço.",
+      "resolution": "Aguardando regra de produto."
+    }
+  ],
+  "latestRun": {
+    "id": "RUN-2026-08-09-INVOICE-CRAZY",
+    "title": "Employee Invoice Crazy E2E",
+    "date": "2026-08-09",
+    "status": "PASS through Save/Edit",
+    "baseline": {
+      "hours": "34h30",
+      "amount": "£980.00"
+    },
+    "final": {
+      "hours": "34h30",
+      "amount": "£1,690.00"
+    },
+    "steps": [
+      {
+        "name": "Client Profile £20 + custom OT rules",
+        "status": "pass"
+      },
+      {
+        "name": "Shift A 06:00–10:00 = 4h00 / £90",
+        "status": "pass"
+      },
+      {
+        "name": "Shift B 16:00–23:00 = 7h00 / £200",
+        "status": "pass"
+      },
+      {
+        "name": "Shift C 06:00–23:00 + 60m break = 16h00 / £390",
+        "status": "pass"
+      },
+      {
+        "name": "Shift D 18:00–23:00 @ £30 = 5h00 / £240",
+        "status": "pass"
+      },
+      {
+        "name": "Shift E 06:00–09:00 + 30m break = 2h30 / £60",
+        "status": "pass"
+      },
+      {
+        "name": "Home aggregate = 34h30 / £980",
+        "status": "pass"
+      },
+      {
+        "name": "Starter row seeded from Client defaults",
+        "status": "pass"
+      },
+      {
+        "name": "Generate from Shifts shows exactly 5 eligible shifts",
+        "status": "pass"
+      },
+      {
+        "name": "Import preserves time/break/rate/OT/rules snapshots",
+        "status": "pass"
+      },
+      {
+        "name": "Duplicate protection hides already imported shifts",
+        "status": "pass"
+      },
+      {
+        "name": "Removing a row unlocks only that source shift",
+        "status": "pass"
+      },
+      {
+        "name": "Manual rate edit £20 → £40 recalculates Invoice £980 → £1,070",
+        "status": "pass"
+      },
+      {
+        "name": "Original standalone Shift remains unchanged",
+        "status": "pass"
+      },
+      {
+        "name": "Break edit to 30m recalculates £1,070 → £1,050",
+        "status": "pass"
+      },
+      {
+        "name": "Time edit to 06:00–23:00 recalculates to £1,690",
+        "status": "pass"
+      },
+      {
+        "name": "Save persists £1,690",
+        "status": "pass"
+      },
+      {
+        "name": "Save → Edit preserves 5 rows, rate £40, break, OT/rules and total",
+        "status": "pass"
+      },
+      {
+        "name": "sourceShiftId survives Save → Edit",
+        "status": "pass"
+      },
+      {
+        "name": "Preview / PDF parity",
+        "status": "pending"
+      },
+      {
+        "name": "Expenses inside Invoice",
+        "status": "pending"
+      }
+    ]
+  },
+  "rules": [
+    {
+      "id": "R-01",
+      "title": "Profile ID is authoritative",
+      "text": "When profileId/clientId exists, Profile identity wins over editable text."
+    },
+    {
+      "id": "R-02",
+      "title": "Manual name is not Profile identity",
+      "text": "Exact normalized name matching may be used only for approved eligibility/read-only legacy compatibility."
+    },
+    {
+      "id": "R-03",
+      "title": "One client per Employee Invoice",
+      "text": "Protected employee rows must not be silently mixed across client identities."
+    },
+    {
+      "id": "R-04",
+      "title": "Historical snapshot wins",
+      "text": "Imported/existing rows preserve rate, overtime and rules; current client defaults seed new rows only."
+    },
+    {
+      "id": "R-05",
+      "title": "Break maximizes employee pay",
+      "text": "Break minutes are deducted from the lowest active multiplier bucket first."
+    },
+    {
+      "id": "R-06",
+      "title": "Decimal internally, formatted visually",
+      "text": "Financial math keeps decimal hours; UI uses hours/minutes formatting."
+    },
+    {
+      "id": "R-07",
+      "title": "Duplicate protection is per Invoice",
+      "text": "The same historical Shift may appear in multiple Invoices, but not twice in the same one."
+    }
+  ],
+  "nextScenarios": [
+    {
+      "id": "NEXT-01",
+      "area": "Invoice",
+      "title": "Preview / PDF parity for £1,690 fixture",
+      "status": "next"
+    },
+    {
+      "id": "NEXT-02",
+      "area": "Expenses",
+      "title": "Expense standalone behavior",
+      "status": "pending"
+    },
+    {
+      "id": "NEXT-03",
+      "area": "Invoice + Expenses",
+      "title": "Expense linking and no double counting",
+      "status": "pending"
+    },
+    {
+      "id": "NEXT-04",
+      "area": "Quotes",
+      "title": "Quote → Invoice E2E with client snapshots",
+      "status": "pending"
+    },
+    {
+      "id": "NEXT-05",
       "area": "Calendar",
       "title": "Delete standalone Shift already imported into Invoice",
-      "status": "pending",
-      "expectation": "History entry disappears; Invoice snapshot remains."
+      "status": "pending"
     },
     {
-      "id": "P-20",
+      "id": "NEXT-06",
       "area": "Cross-midnight",
-      "title": "21:00–06:00 with OT and break",
-      "status": "pending",
-      "expectation": "Correct day/rule boundaries."
+      "title": "21:00–06:00 with multiple OT bands and break",
+      "status": "pending"
     },
     {
-      "id": "P-21",
+      "id": "NEXT-07",
       "area": "Long break",
-      "title": "Break longer than the entire 1x bucket",
-      "status": "pending",
-      "expectation": "Consumes 1x first, then next-lowest multiplier."
-    }
-  ],
-  "knownDebt": [
-    {
-      "id": "DEBT-01",
-      "title": "rules: [] live default drift",
-      "status": "deferred",
-      "detail": "Historical empty rules may still resolve against current State.defaultRules."
+      "title": "Break longer than complete 1x bucket",
+      "status": "pending"
     },
     {
-      "id": "DEBT-02",
-      "title": "Regex/source-level tests",
-      "status": "deferred",
-      "detail": "Several regression tests inspect source strings rather than execute full DOM behavior."
-    },
-    {
-      "id": "DEBT-03",
-      "title": "Expense client-linking assumptions",
-      "status": "follow-up",
-      "detail": "Some Expense logic/comments predate Invoice client.profileId."
-    },
-    {
-      "id": "DEBT-04",
-      "title": "Agenda legacy edit preservation",
-      "status": "follow-up",
-      "detail": "Read-only name fallback is safe, but editing legacy events may drop clientName."
-    },
-    {
-      "id": "DEBT-05",
-      "title": "Quote double conversion",
-      "status": "deferred",
-      "detail": "UI guard exists; state-side idempotency remains a separate design item."
-    },
-    {
-      "id": "DEBT-06",
-      "title": "Service Invoice hourly-rate policy",
-      "status": "product decision",
-      "detail": "Client hourly rate currently remains employee-shift scoped."
+      "id": "NEXT-08",
+      "area": "Agenda",
+      "title": "Legacy clientName edit preservation",
+      "status": "pending"
     }
   ]
 };
