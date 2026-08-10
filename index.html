@@ -3,8 +3,8 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>TempusMate QA & Release Readiness v4</title><link rel="stylesheet" href="styles.css">
 </head><body>
-<header><div class="wrap top"><div><h1>🧪 TempusMate QA & Release Readiness</h1><p>Living QA Specification • v4 • 10 Aug 2026</p></div>
-<nav><a href="#exec">Executivo</a><a href="#history">Histórico</a><a href="#rules">Regras</a><a href="#audit">Super Auditoria</a><a href="#next">Próximos</a></nav></div></header>
+<header><div class="wrap top"><div><h1>🧪 TempusMate QA & Release Readiness</h1><p>Living QA Specification • v5 • 10 Aug 2026</p></div>
+<nav><a href="#exec">Executivo</a><a href="#history">Histórico</a><a href="#rules">Regras</a><a href="#northstar">North Star</a><a href="#audit">Super Auditoria</a><a href="#next">Próximos</a></nav></div></header>
 <main class="wrap">
 <section id="exec">
 <div class="hero card"><div><span class="eyebrow">RELEASE READINESS</span><h2>Core Invoice + Calendar estabilizados</h2><p>O QA já encontrou falhas reais de cálculo, overtime, identidade, importação duplicada e Calendar→Invoice. Agora fechamos Unassigned/PDF/Expenses e partimos para a auditoria arquitetural.</p></div><div class="statusbox"><span class="badge final-validation">FINAL VALIDATION</span><strong>458</strong><span>unit tests • 0 failures</span></div></div>
@@ -15,7 +15,7 @@
 <div class="card metric"><span>Regressões</span><strong>4</strong></div>
 <div class="card metric"><span>E2E financeiro</span><strong>£1,690</strong></div>
 </div>
-<div class="card warning"><b>⚠ Próximo blocker:</b> no Calendar, Shift totalmente sem cliente não deve entrar automaticamente na Invoice do Profile escolhido. Ele deve exigir seleção explícita via <b>Unassigned</b>.</div>
+<div class="card warning"><b>⚠ Próximos blockers:</b> Calendar Unassigned explícito + Load Profile fallback + PDF footer smoke test.</div>
 </section>
 
 <section id="history"><div class="sectionhead"><h2>Master Stabilization History</h2><p>Bugs, regressões, decisões e dívida técnica encontrados durante a estabilização.</p></div><article class="card item">
@@ -108,9 +108,37 @@
     </article><article class="card item">
       <div class="item-tags"><strong>DEBT-001</strong><span class="badge tech-debt">TECH DEBT</span><span class="badge high">HIGH</span><span class="badge ready">ready</span></div>
       <div><h3>Super auditoria de qualidade</h3><div class="muted">Architecture</div><p>Após centenas de ajustes, precisamos provar que regras equivalentes não estão duplicadas/divergindo.</p><p><b>Estado / regra:</b> Auditoria independente: Claude Sonnet 5 + Gemini + ChatGPT; depois relatório de consenso.</p></div>
-    </article></section>
+    </article>
+<article class="card item"><div class="item-tags"><strong>BUG-019…024</strong><span class="badge bug">NEW QA</span><span class="badge high">HIGH/MEDIUM</span></div>
+<div><h3>Calendar identity/import + Load Profile state partitioning</h3><div class="muted">Latest stabilization cycle</div>
+<p>Calendar mixed-client import, sourceShiftId loss, Profile/manual grouping divergence, Cancel/CSP and Load Profile profile-store mismatch were investigated/fixed or queued.</p>
+<p><b>Estado:</b> Calendar identity core passed manual QA; Unassigned and Load Profile fallback remain final validation.</p></div></article>
+<article class="card item"><div class="item-tags"><strong>RULE-014</strong><span class="badge rule">RULE</span><span class="badge high">HIGH</span></div>
+<div><h3>Master Data vs Transaction Snapshot</h3><div class="muted">Architecture</div>
+<p>Live Profile/default changes must not rewrite historical Shift/Quote/Invoice/Expense values.</p><p><b>Estado:</b> promoted to architectural invariant for roadmap expansion.</p></div></article>
+</section>
 
 <section id="rules"><div class="sectionhead"><h2>Living Domain Specification</h2><p>As “regras malucas” que agora precisam sobreviver a qualquer refactor futuro.</p></div><div class="rulegrid"><article class="card rule"><div class="muted">RULE-001</div><h3>Profile ID é autoritativo</h3><p>clientId vence nome; manual só reconcilia por exact normalized match.</p></article><article class="card rule"><div class="muted">RULE-002</div><h3>Match manual nunca pode ser fuzzy</h3><p>Somente match exato após normalização.</p></article><article class="card rule"><div class="muted">RULE-003</div><h3>Ambiguidade não é resolvida silenciosamente</h3><p>Manual permanece separado; não escolher Profile arbitrariamente.</p></article><article class="card rule"><div class="muted">RULE-004</div><h3>sourceShiftId é per-Invoice</h3><p>Outra Invoice pode reutilizar conscientemente o mesmo Shift.</p></article><article class="card rule"><div class="muted">RULE-005</div><h3>Unassigned deve exigir ação explícita</h3><p>Calendar deve mostrar Unassigned como grupo próprio; escolher Profile nunca importa blank automaticamente.</p></article><article class="card rule"><div class="muted">RULE-006</div><h3>Blank pode continuar elegível dentro de Invoice já aberta</h3><p>Regra intencionalmente diferente do Calendar.</p></article><article class="card rule"><div class="muted">RULE-007</div><h3>Break desconta menor multiplier primeiro</h3><p>Manter ordem crescente de multiplier.</p></article><article class="card rule"><div class="muted">RULE-008</div><h3>Decimal hours só internamente</h3><p>UI/PDF exibem hora/minuto real.</p></article><article class="card rule"><div class="muted">RULE-009</div><h3>SERVICE substitui SITE/JOB quando representa serviço</h3><p>Usar SERVICE; Employee Invoice usa BASE RATE.</p></article><article class="card rule"><div class="muted">RULE-010</div><h3>Layout adapta densidade ao conteúdo</h3><p>comfortable/dense por contentWeight + proteção de page break.</p></article></div></section>
+
+
+<section id="northstar">
+<div class="sectionhead"><h2>🧭 Product North Star / Future Architecture Context</h2><p>Contexto de roadmap usado para avaliar se a arquitetura atual aguenta a próxima fase sem overengineering.</p></div>
+<div class="card audit">
+<h3>Direção do produto</h3>
+<p><b>Agenda</b> tende a virar o centro operacional conectando Clients, Jobs, Quotes, Invoices, Expenses/Receipts e Materials.</p>
+<h3>Fluxo futuro representativo</h3>
+<p><b>Job → Shopping List → Purchase → Expense → Invoice</b></p>
+<h3>Princípios que já devem influenciar a auditoria</h3>
+<ul>
+<li>Master Data e Transaction Snapshots precisam ser conceitos distintos.</li>
+<li>Mudar rate, overtime, VAT, endereço ou preço de material não deve reescrever documentos históricos.</li>
+<li>Identity/relationship rules não podem ser reinventadas módulo a módulo.</li>
+<li>Expenses tendem a alimentar Revenue, Profit, Tax Summary e Accountant Export.</li>
+<li>Uma entidade Job de primeira classe deve ser avaliada por sinais reais do código, não criada prematuramente.</li>
+<li>Second Brain/reminders futuros dependem de relacionamentos e histórico confiáveis.</li>
+</ul>
+</div>
+</section>
 
 <section id="audit">
 <div class="sectionhead"><h2>🔎 Super Auditoria de Qualidade de Código</h2><p>Claude Sonnet 5 + Gemini + ChatGPT GPT-5.6 Sol • análises independentes → consenso.</p></div>

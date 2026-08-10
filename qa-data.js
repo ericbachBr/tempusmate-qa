@@ -2,24 +2,27 @@ window.QA_DATA = {
   "meta": {
     "project": "TempusMate",
     "title": "QA, Stabilization & Release Readiness",
-    "version": "2.0",
-    "updatedAt": "2026-08-09",
-    "releaseStatus": "E2E in progress",
+    "version": "5.0",
+    "updatedAt": "2026-08-10",
+    "releaseStatus": "Final validation + Architecture Audit",
     "releaseTone": "warning",
-    "headline": "Core Employee Invoice flow validated through Save → Edit with complex overtime/rate scenarios.",
+    "headline": "Invoice and Calendar stabilization advanced significantly; Unassigned, PDF/Expenses validation and architecture audit remain before broader expansion.",
     "remainingValidation": [
-      "Invoice Preview / PDF parity",
-      "Expense module and Expense ↔ Invoice integration",
-      "Quote/Service follow-up scenarios",
-      "Cross-midnight and long-break edge cases"
+      "Calendar explicit Unassigned behavior",
+      "Load Profile fallback / profile-state UX",
+      "PDF footer orphan-page smoke test",
+      "Large PDF pagination stress test",
+      "Expense standalone and Expense ↔ Invoice integration",
+      "Quote → Invoice final regression",
+      "Three-agent architecture/code-quality audit"
     ]
   },
   "executive": {
-    "automatedTests": 448,
+    "automatedTests": 458,
     "automatedFailures": 0,
     "latestBuild": "Clean",
-    "manualRunStatus": "PASS through Save/Edit",
-    "poMessage": "A versão ainda está em estabilização ativa. Vários bugs de integridade financeira e identidade foram encontrados e corrigidos antes de liberar uma nova build para teste externo."
+    "manualRunStatus": "PASS core Invoice + Calendar identity flows; final blockers open",
+    "poMessage": "A estabilização encontrou e corrigiu falhas reais de cálculo, snapshots, identidade e importação. O produto está mais seguro, mas ainda há validações finais e uma auditoria arquitetural antes de expandir os módulos premium."
   },
   "masterItems": [
     {
@@ -257,10 +260,10 @@ window.QA_DATA = {
       "type": "FEATURE / GAP",
       "area": "Profile",
       "severity": "LOW",
-      "status": "implemented",
+      "status": "regression",
       "title": "Load Profile / dados do usuário",
-      "detail": "Fluxo de carregar dados do próprio usuário no formulário.",
-      "resolution": "Implementado anteriormente."
+      "detail": "Load Profile existe, mas QA revelou conflito entre My Profile (State.userProfile) e Settings → Default Worker Details.",
+      "resolution": "Em correção: My Profile → fallback Default Worker Details; feedback de sucesso somente quando dados reais forem carregados."
     },
     {
       "id": "GAP-007",
@@ -331,13 +334,123 @@ window.QA_DATA = {
       "title": "Hourly rate de Client Profile em Service Invoice",
       "detail": "Hoje rate/OT do Profile é escopo de employee shift; service/Quote trabalha por quantidade/preço.",
       "resolution": "Aguardando regra de produto."
+    },
+    {
+      "id": "BUG-019",
+      "type": "BUG",
+      "area": "Calendar → Invoice",
+      "severity": "HIGH",
+      "status": "resolved",
+      "title": "Calendar misturava múltiplos clientes em uma única Invoice",
+      "detail": "Selecionar datas transferia todos os shifts e adotava silenciosamente a identidade do primeiro cliente encontrado.",
+      "resolution": "Calendar passou a agrupar identidades e exigir escolha explícita do cliente antes do hand-off."
+    },
+    {
+      "id": "BUG-020",
+      "type": "BUG",
+      "area": "Calendar → Invoice",
+      "severity": "HIGH",
+      "status": "resolved",
+      "title": "Calendar perdia sourceShiftId e metadata de origem",
+      "detail": "O fluxo antigo não preservava sourceShiftId/siteName/workerName/extraFees, permitindo reimportação na mesma Invoice e perda de snapshot.",
+      "resolution": "Calendar e Generate from Shifts compartilham executeShiftsImport(shifts)."
+    },
+    {
+      "id": "BUG-021",
+      "type": "BUG",
+      "area": "Calendar / Identity",
+      "severity": "HIGH",
+      "status": "resolved",
+      "title": "Profile 'ab' e manual 'ab' viravam grupos incompatíveis",
+      "detail": "O modal mostrava Profile ab(2) e manual ab(1); escolher o Profile importava 3, mas escolher o manual importava 0.",
+      "resolution": "Grouping usa duas passagens; manual-name exact normalized match colapsa no único Profile formal correspondente presente na seleção, sem mutar histórico."
+    },
+    {
+      "id": "BUG-022",
+      "type": "BUG",
+      "area": "Calendar UI",
+      "severity": "MEDIUM",
+      "status": "resolved",
+      "title": "Cancel do modal de cliente não funcionava",
+      "detail": "onclick inline era bloqueado por CSP.",
+      "resolution": "Event listener em history.js; Playwright cobre fechamento mantendo selectedHistoryDates."
+    },
+    {
+      "id": "BUG-023",
+      "type": "BUG",
+      "area": "PDF / Pagination",
+      "severity": "MEDIUM",
+      "status": "implemented",
+      "title": "Generated by TempusMate podia gerar página órfã",
+      "detail": "O branding participava do fluxo normal e podia ser empurrado sozinho para uma segunda página.",
+      "resolution": "Transformado em footer fora do fluxo com safe zone; aguarda smoke manual final."
+    },
+    {
+      "id": "BUG-024",
+      "type": "BUG",
+      "area": "Profile / Invoice / Quote",
+      "severity": "MEDIUM",
+      "status": "investigated",
+      "title": "Load Profile parecia quebrado por stores de perfil separados",
+      "detail": "Default Worker Details alimenta Home/Calendar, mas Load Profile de Invoice/Quote lê State.userProfile. Quando My Profile está vazio, o botão carrega blanks e ainda mostra sucesso.",
+      "resolution": "Fix aprovado: My Profile tem precedência; fallback field-by-field para Default Worker Details; não mostrar falso sucesso quando ambos estiverem vazios."
+    },
+    {
+      "id": "RULE-011",
+      "type": "PRODUCT DECISION",
+      "area": "Calendar / Unassigned",
+      "severity": "HIGH",
+      "status": "pending",
+      "title": "Calendar nunca deve anexar blank shift automaticamente ao Profile escolhido",
+      "detail": "Um Shift sem qualquer identidade podia entrar silenciosamente na Invoice de Itau/Santander/Nubank e alterar o cálculo sem ação explícita.",
+      "resolution": "Blank deve virar grupo explícito Unassigned. Escolher Profile importa somente shifts daquele Profile; escolher Unassigned importa somente blanks."
+    },
+    {
+      "id": "RULE-012",
+      "type": "PRODUCT DECISION",
+      "area": "Identity",
+      "severity": "HIGH",
+      "status": "confirmed",
+      "title": "Profile ID é autoritativo e manual-name só reconcilia por match exato não ambíguo",
+      "detail": "Nomes manuais são compatibilidade/eligibilidade, não identidade formal.",
+      "resolution": "Sem fuzzy/contains. Dois Profile IDs iguais no nome continuam separados; match manual ambíguo não escolhe um Profile."
+    },
+    {
+      "id": "RULE-013",
+      "type": "PRODUCT DECISION",
+      "area": "Invoice / Origin",
+      "severity": "HIGH",
+      "status": "confirmed",
+      "title": "sourceShiftId é proteção per-Invoice, não ownership global",
+      "detail": "O mesmo Shift pode ser reutilizado em outra Invoice, mas não duplicado dentro da Invoice atual.",
+      "resolution": "Não criar flags globais invoiced/consumed no histórico."
+    },
+    {
+      "id": "RULE-014",
+      "type": "PRODUCT DECISION",
+      "area": "Master Data / Snapshots",
+      "severity": "HIGH",
+      "status": "confirmed",
+      "title": "Master Data não pode reescrever documentos históricos",
+      "detail": "Client/Profile/defaults são dados vivos; Shift/Quote/Invoice/Expense precisam preservar snapshots financeiros e de identidade conforme o momento da transação.",
+      "resolution": "Regra vira princípio arquitetural para a expansão futura."
+    },
+    {
+      "id": "DEBT-007",
+      "type": "TECH DEBT",
+      "area": "Architecture",
+      "severity": "HIGH",
+      "status": "ready",
+      "title": "Super Auditoria independente de qualidade e arquitetura",
+      "detail": "Auditoria cruzará duplicação de regras, State, DOM vs domínio, snapshots, cálculos financeiros e preparação para Agenda/Jobs/Expenses/Materials.",
+      "resolution": "Claude Sonnet 5 + Gemini + ChatGPT farão análises independentes antes de qualquer refactor."
     }
   ],
   "latestRun": {
     "id": "RUN-2026-08-09-INVOICE-CRAZY",
     "title": "Employee Invoice Crazy E2E",
     "date": "2026-08-09",
-    "status": "PASS through Save/Edit",
+    "status": "PASS core flow / final validation pending",
     "baseline": {
       "hours": "34h30",
       "amount": "£980.00"
@@ -430,6 +543,38 @@ window.QA_DATA = {
       {
         "name": "Expenses inside Invoice",
         "status": "pending"
+      },
+      {
+        "name": "Calendar button represents N shifts, not N days",
+        "status": "pass"
+      },
+      {
+        "name": "Calendar mixed-client selection requires explicit client choice",
+        "status": "pass"
+      },
+      {
+        "name": "Calendar Profile ab + manual ab collapses to one executable group",
+        "status": "pass"
+      },
+      {
+        "name": "Calendar Cancel preserves date selection",
+        "status": "pass"
+      },
+      {
+        "name": "Calendar Unassigned never auto-imports with selected Profile",
+        "status": "pending"
+      },
+      {
+        "name": "Load Profile My Profile → Default Worker fallback",
+        "status": "pending"
+      },
+      {
+        "name": "PDF adaptive layout / SERVICE / BASE RATE / Clock In-Out",
+        "status": "pass"
+      },
+      {
+        "name": "PDF footer orphan-page smoke test",
+        "status": "pending"
       }
     ]
   },
@@ -468,56 +613,93 @@ window.QA_DATA = {
       "id": "R-07",
       "title": "Duplicate protection is per Invoice",
       "text": "The same historical Shift may appear in multiple Invoices, but not twice in the same one."
+    },
+    {
+      "id": "R-08",
+      "title": "Calendar Unassigned requires explicit intent",
+      "text": "A completely blank-client Shift must not silently accompany a selected Profile when Calendar creates an Invoice."
+    },
+    {
+      "id": "R-09",
+      "title": "Manual-name reconciliation is exact and non-mutating",
+      "text": "A manual client name may join one unambiguous matching Profile for eligibility/grouping only; it must not write clientId back to history."
+    },
+    {
+      "id": "R-10",
+      "title": "Master Data vs Transaction Snapshot",
+      "text": "Changing live Client/Profile/default data must not retroactively rewrite historical financial transactions."
+    },
+    {
+      "id": "R-11",
+      "title": "Load Profile precedence is explicit",
+      "text": "Billing My Profile has precedence; Default Worker Details are fallback. Empty sources must not produce false success feedback."
     }
   ],
   "nextScenarios": [
     {
       "id": "NEXT-01",
-      "area": "Invoice",
-      "title": "Preview / PDF parity for £1,690 fixture",
+      "area": "Calendar",
+      "title": "Implement/retest explicit Unassigned group",
       "status": "next"
     },
     {
       "id": "NEXT-02",
+      "area": "Profile",
+      "title": "Retest Load Profile precedence/fallback in Invoice and Quote",
+      "status": "next"
+    },
+    {
+      "id": "NEXT-03",
+      "area": "PDF",
+      "title": "Retest footer without orphan page",
+      "status": "pending"
+    },
+    {
+      "id": "NEXT-04",
+      "area": "PDF",
+      "title": "15-row dense + 30-row multi-page stress",
+      "status": "pending"
+    },
+    {
+      "id": "NEXT-05",
       "area": "Expenses",
       "title": "Expense standalone behavior",
       "status": "pending"
     },
     {
-      "id": "NEXT-03",
+      "id": "NEXT-06",
       "area": "Invoice + Expenses",
-      "title": "Expense linking and no double counting",
+      "title": "Linked Expenses, receipts and no double counting",
       "status": "pending"
     },
     {
-      "id": "NEXT-04",
+      "id": "NEXT-07",
       "area": "Quotes",
       "title": "Quote → Invoice E2E with client snapshots",
       "status": "pending"
     },
     {
-      "id": "NEXT-05",
-      "area": "Calendar",
-      "title": "Delete standalone Shift already imported into Invoice",
-      "status": "pending"
-    },
-    {
-      "id": "NEXT-06",
-      "area": "Cross-midnight",
-      "title": "21:00–06:00 with multiple OT bands and break",
-      "status": "pending"
-    },
-    {
-      "id": "NEXT-07",
-      "area": "Long break",
-      "title": "Break longer than complete 1x bucket",
-      "status": "pending"
-    },
-    {
       "id": "NEXT-08",
-      "area": "Agenda",
-      "title": "Legacy clientName edit preservation",
+      "area": "Architecture",
+      "title": "Claude + Gemini + ChatGPT independent audit and consensus",
+      "status": "ready"
+    },
+    {
+      "id": "NEXT-09",
+      "area": "QA Infrastructure",
+      "title": "Deterministic ~90-day stress fixture",
       "status": "pending"
     }
-  ]
+  ],
+  "productNorthStar": {
+    "summary": "Agenda is intended to become the operational center connecting Clients, Jobs, Quotes, Invoices, Expenses/Receipts and future Materials workflows.",
+    "futureFlow": "Job → Shopping List → Purchase → Expense → Invoice",
+    "principles": [
+      "Agenda/Jobs should connect operational and financial artifacts without duplicating identity rules.",
+      "Master data changes must not rewrite historical transactional snapshots.",
+      "Expenses will become a financial source for Revenue / Profit / Tax summaries.",
+      "A first-class Job entity should be evaluated by evidence, not introduced prematurely.",
+      "Future Second Brain/reminders depend on consistent relationships and trustworthy history."
+    ]
+  }
 };
