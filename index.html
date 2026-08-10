@@ -4,15 +4,95 @@
 <main><section id="executive" class="tab active"></section><section id="history" class="tab"></section><section id="run" class="tab"></section><section id="rules" class="tab"></section><section id="next" class="tab"></section></main>
 <footer>Dashboard estático versionado. Fonte única: <code>qa-data.js</code>.</footer><script src="qa-data.js"></script>
 <script>
-const d=window.QA_DATA,esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),cls=s=>String(s).toLowerCase().replace(/\s+/g,'-'),badge=s=>`<span class="badge ${cls(s)}">${esc(s)}</span>`,items=d.masterItems,bugs=items.filter(x=>x.type==='BUG'),resolvedBugs=bugs.filter(x=>x.status==='resolved').length,openBugs=bugs.filter(x=>x.status!=='resolved').length,fixedLike=items.filter(x=>['resolved','implemented'].includes(x.status)).length;
-updated.textContent=`Atualizado em ${d.meta.updatedAt} • ${d.meta.releaseStatus}`;
-nav.onclick=e=>{const b=e.target.closest('button[data-tab]');if(!b)return;document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.id===b.dataset.tab));};
-executive.innerHTML=`<div class="hero"><div class="card heroMain"><h2>${esc(d.meta.headline)}</h2><p>${esc(d.executive.poMessage)}</p></div><div class="card release"><span class="small">Release readiness</span><strong>${esc(d.meta.releaseStatus)}</strong>${badge('warning')}<p class="small">${esc(d.executive.manualRunStatus)} • ${esc(d.executive.latestBuild)} build</p></div></div>
-<div class="metrics"><div class="card metric"><span>Confirmed bugs</span><strong>${bugs.length}</strong></div><div class="card metric"><span>Resolved bugs</span><strong>${resolvedBugs}</strong></div><div class="card metric"><span>Open / verify</span><strong>${openBugs}</strong></div><div class="card metric"><span>Automated tests</span><strong>${d.executive.automatedTests}</strong></div><div class="card metric"><span>Automated failures</span><strong>${d.executive.automatedFailures}</strong></div></div>
-<div class="kpiStrip"><div class="card progress"><h3>Último E2E</h3><div class="small">${esc(d.latestRun.title)}</div><strong style="display:block;font-size:1.6rem;margin:8px 0">${esc(d.latestRun.final.amount)}</strong><div class="small">${esc(d.latestRun.final.hours)} • ${esc(d.latestRun.status)}</div></div><div class="card callout"><strong>Validação ainda restante</strong>${d.meta.remainingValidation.map(x=>`<div>• ${esc(x)}</div>`).join('')}</div></div>
-<div class="sectionHead"><h2>Distribuição do trabalho de estabilização</h2></div><div class="metrics">${['BUG','FEATURE / GAP','TECH DEBT','PRODUCT DECISION'].map(t=>`<div class="card metric"><span>${esc(t)}</span><strong>${items.filter(x=>x.type===t).length}</strong></div>`).join('')}<div class="card metric"><span>Resolved / implemented items</span><strong>${fixedLike}</strong></div></div>`;
-function renderHistory(){const types=[...new Set(items.map(x=>x.type))],areas=[...new Set(items.map(x=>x.area))].sort();history.innerHTML=`<div class="sectionHead"><h2>Master stabilization history</h2><div class="toolbar"><input id="q" type="search" placeholder="Buscar..."><select id="type"><option value="">Todos tipos</option>${types.map(x=>`<option>${esc(x)}</option>`).join('')}</select><select id="status"><option value="">Todos status</option>${[...new Set(items.map(x=>x.status))].map(x=>`<option>${esc(x)}</option>`).join('')}</select><select id="area"><option value="">Todas áreas</option>${areas.map(x=>`<option>${esc(x)}</option>`).join('')}</select></div></div><div id="historyList" class="list"></div>`;const paint=()=>{const qv=q.value.toLowerCase(),tv=type.value,sv=status.value,av=area.value,rows=items.filter(x=>(!qv||JSON.stringify(x).toLowerCase().includes(qv))&&(!tv||x.type===tv)&&(!sv||x.status===sv)&&(!av||x.area===av));historyList.innerHTML=rows.map(x=>`<article class="card row"><div><div class="meta">${esc(x.id)}</div>${badge(x.severity)}<div style="margin-top:6px">${badge(x.type)}</div></div><div><h3>${esc(x.title)}</h3><div class="meta">${esc(x.area)}</div><p>${esc(x.detail)}</p><p><strong>Resolution / state:</strong> ${esc(x.resolution)}</p></div><div>${badge(x.status)}</div></article>`).join('')||'<div class="card row">Nenhum item.</div>';};['q','type','status','area'].forEach(id=>document.getElementById(id).addEventListener('input',paint));paint();}renderHistory();
-run.innerHTML=`<div class="sectionHead"><h2>${esc(d.latestRun.title)}</h2>${badge(d.latestRun.status)}</div><div class="hero"><div class="card release"><span class="small">Baseline</span><strong>${esc(d.latestRun.baseline.amount)}</strong><div class="small">${esc(d.latestRun.baseline.hours)}</div></div><div class="card release"><span class="small">Final tested fixture</span><strong>${esc(d.latestRun.final.amount)}</strong><div class="small">${esc(d.latestRun.final.hours)}</div></div></div><div class="sectionHead"><h2>Passos</h2></div><div class="card progress">${d.latestRun.steps.map(x=>`<div class="step"><span class="dot ${cls(x.status)}"></span><div>${esc(x.name)}</div><div>${badge(x.status)}</div></div>`).join('')}</div>`;
-rules.innerHTML=`<div class="sectionHead"><h2>Regras de domínio confirmadas</h2></div><div class="rules">${d.rules.map(x=>`<article class="card rule"><div class="meta">${esc(x.id)}</div><h3>${esc(x.title)}</h3><p>${esc(x.text)}</p></article>`).join('')}</div>`;
-next.innerHTML=`<div class="sectionHead"><h2>Próximos cenários</h2></div><div class="list">${d.nextScenarios.map(x=>`<article class="card row"><div><div class="meta">${esc(x.id)}</div>${badge(x.status)}</div><div><h3>${esc(x.title)}</h3><div class="meta">${esc(x.area)}</div></div><div></div></article>`).join('')}</div>`;
+const d = window.QA_DATA;
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const cls = s => String(s).toLowerCase().replace(/\s+/g,'-');
+const badge = s => `<span class="badge ${cls(s)}">${esc(s)}</span>`;
+const items = d.masterItems;
+const bugs = items.filter(x => x.type === 'BUG');
+const resolvedBugs = bugs.filter(x => x.status === 'resolved').length;
+const openBugs = bugs.filter(x => x.status !== 'resolved').length;
+const fixedLike = items.filter(x => ['resolved','implemented'].includes(x.status)).length;
+
+$('updated').textContent = `Atualizado em ${d.meta.updatedAt} • ${d.meta.releaseStatus}`;
+
+$('nav').addEventListener('click', e => {
+  const b = e.target.closest('button[data-tab]');
+  if (!b) return;
+  document.querySelectorAll('#nav button').forEach(x => x.classList.toggle('active', x === b));
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.id === b.dataset.tab));
+});
+
+$('executive').innerHTML = `
+<div class="hero">
+  <div class="card heroMain"><h2>${esc(d.meta.headline)}</h2><p>${esc(d.executive.poMessage)}</p></div>
+  <div class="card release"><span class="small">Release readiness</span><strong>${esc(d.meta.releaseStatus)}</strong>${badge('warning')}<p class="small">${esc(d.executive.manualRunStatus)} • ${esc(d.executive.latestBuild)} build</p></div>
+</div>
+<div class="metrics">
+  <div class="card metric"><span>Confirmed bugs</span><strong>${bugs.length}</strong></div>
+  <div class="card metric"><span>Resolved bugs</span><strong>${resolvedBugs}</strong></div>
+  <div class="card metric"><span>Open / verify</span><strong>${openBugs}</strong></div>
+  <div class="card metric"><span>Automated tests</span><strong>${d.executive.automatedTests}</strong></div>
+  <div class="card metric"><span>Automated failures</span><strong>${d.executive.automatedFailures}</strong></div>
+</div>
+<div class="kpiStrip">
+  <div class="card progress"><h3>Último E2E</h3><div class="small">${esc(d.latestRun.title)}</div><strong style="display:block;font-size:1.6rem;margin:8px 0">${esc(d.latestRun.final.amount)}</strong><div class="small">${esc(d.latestRun.final.hours)} • ${esc(d.latestRun.status)}</div></div>
+  <div class="card callout"><strong>Validação ainda restante</strong>${d.meta.remainingValidation.map(x=>`<div>• ${esc(x)}</div>`).join('')}</div>
+</div>
+<div class="sectionHead"><h2>Distribuição do trabalho de estabilização</h2></div>
+<div class="metrics">
+  ${['BUG','FEATURE / GAP','TECH DEBT','PRODUCT DECISION'].map(t=>`<div class="card metric"><span>${esc(t)}</span><strong>${items.filter(x=>x.type===t).length}</strong></div>`).join('')}
+  <div class="card metric"><span>Resolved / implemented items</span><strong>${fixedLike}</strong></div>
+</div>`;
+
+function renderHistory() {
+  const types = [...new Set(items.map(x => x.type))];
+  const areas = [...new Set(items.map(x => x.area))].sort();
+  const statuses = [...new Set(items.map(x => x.status))];
+  $('history').innerHTML = `
+    <div class="sectionHead"><h2>Master stabilization history</h2><div class="toolbar">
+      <input id="q" type="search" placeholder="Buscar...">
+      <select id="typeFilter"><option value="">Todos tipos</option>${types.map(x=>`<option>${esc(x)}</option>`).join('')}</select>
+      <select id="statusFilter"><option value="">Todos status</option>${statuses.map(x=>`<option>${esc(x)}</option>`).join('')}</select>
+      <select id="areaFilter"><option value="">Todas áreas</option>${areas.map(x=>`<option>${esc(x)}</option>`).join('')}</select>
+    </div></div>
+    <div id="historyList" class="list"></div>`;
+
+  const paint = () => {
+    const qv = $('q').value.toLowerCase();
+    const tv = $('typeFilter').value;
+    const sv = $('statusFilter').value;
+    const av = $('areaFilter').value;
+    const rows = items.filter(x =>
+      (!qv || JSON.stringify(x).toLowerCase().includes(qv)) &&
+      (!tv || x.type === tv) &&
+      (!sv || x.status === sv) &&
+      (!av || x.area === av)
+    );
+    $('historyList').innerHTML = rows.length ? rows.map(x=>`
+      <article class="card row">
+        <div><div class="meta">${esc(x.id)}</div>${badge(x.severity)}<div style="margin-top:6px">${badge(x.type)}</div></div>
+        <div><h3>${esc(x.title)}</h3><div class="meta">${esc(x.area)}</div><p>${esc(x.detail)}</p><p><strong>Resolution / state:</strong> ${esc(x.resolution)}</p></div>
+        <div>${badge(x.status)}</div>
+      </article>`).join('') : '<div class="card row">Nenhum item.</div>';
+  };
+
+  ['q','typeFilter','statusFilter','areaFilter'].forEach(id => $(id).addEventListener('input', paint));
+  paint();
+}
+renderHistory();
+
+$('run').innerHTML = `
+<div class="sectionHead"><h2>${esc(d.latestRun.title)}</h2>${badge(d.latestRun.status)}</div>
+<div class="hero">
+  <div class="card release"><span class="small">Baseline</span><strong>${esc(d.latestRun.baseline.amount)}</strong><div class="small">${esc(d.latestRun.baseline.hours)}</div></div>
+  <div class="card release"><span class="small">Final tested fixture</span><strong>${esc(d.latestRun.final.amount)}</strong><div class="small">${esc(d.latestRun.final.hours)}</div></div>
+</div>
+<div class="sectionHead"><h2>Passos</h2></div>
+<div class="card progress">${d.latestRun.steps.map(x=>`<div class="step"><span class="dot ${cls(x.status)}"></span><div>${esc(x.name)}</div><div>${badge(x.status)}</div></div>`).join('')}</div>`;
+
+$('rules').innerHTML = `<div class="sectionHead"><h2>Regras de domínio confirmadas</h2></div><div class="rules">${d.rules.map(x=>`<article class="card rule"><div class="meta">${esc(x.id)}</div><h3>${esc(x.title)}</h3><p>${esc(x.text)}</p></article>`).join('')}</div>`;
+
+$('next').innerHTML = `<div class="sectionHead"><h2>Próximos cenários</h2></div><div class="list">${d.nextScenarios.map(x=>`<article class="card row"><div><div class="meta">${esc(x.id)}</div>${badge(x.status)}</div><div><h3>${esc(x.title)}</h3><div class="meta">${esc(x.area)}</div></div><div></div></article>`).join('')}</div>`;
 </script></body></html>
