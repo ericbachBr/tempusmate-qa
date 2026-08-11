@@ -1,22 +1,34 @@
 <!doctype html>
 <html lang="pt-BR"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TempusMate QA & Release Readiness v4</title><link rel="stylesheet" href="styles.css">
+<title>TempusMate QA & Release Readiness v6</title><link rel="stylesheet" href="styles.css">
 </head><body>
-<header><div class="wrap top"><div><h1>🧪 TempusMate QA & Release Readiness</h1><p>Living QA Specification • v5 • 10 Aug 2026</p></div>
-<nav><a href="#exec">Executivo</a><a href="#history">Histórico</a><a href="#rules">Regras</a><a href="#northstar">North Star</a><a href="#audit">Super Auditoria</a><a href="#next">Próximos</a></nav></div></header>
+<header><div class="wrap top"><div><h1>🧪 TempusMate QA & Release Readiness</h1><p>Living QA Specification • v6 • 11 Aug 2026</p></div>
+<nav><a href="#exec">Executivo</a><a href="#recent">Fechamento R2</a><a href="#history">Histórico</a><a href="#rules">Regras</a><a href="#audit">Auditoria</a><a href="#next">Próximos</a><button id="theme-toggle" class="theme-toggle" type="button" aria-label="Alternar tema">☀️ Claro</button></nav></div></header>
 <main class="wrap">
 <section id="exec">
-<div class="hero card"><div><span class="eyebrow">RELEASE READINESS</span><h2>Core Invoice + Calendar estabilizados</h2><p>O QA já encontrou falhas reais de cálculo, overtime, identidade, importação duplicada e Calendar→Invoice. Agora fechamos Unassigned/PDF/Expenses e partimos para a auditoria arquitetural.</p></div><div class="statusbox"><span class="badge final-validation">FINAL VALIDATION</span><strong>458</strong><span>unit tests • 0 failures</span></div></div>
+<div class="hero card"><div><span class="eyebrow">RELEASE READINESS</span><h2>Invoice / Financial Audit encerrada</h2><p>O ciclo R0 → R2.8 fechou identidade, snapshots, overtime, fees/Expenses, Employee/Employer/Service UBL, VAT legado e o último gap visual de VAT sobre materials. Calendar Unassigned também está coberto por E2E real.</p></div><div class="statusbox"><span class="badge audit-closed">AUDIT CLOSED</span><strong>699</strong><span>unit tests • 0 failures</span></div></div>
 <div class="metrics">
-<div class="card metric"><span>Bugs registrados</span><strong>15</strong></div>
-<div class="card metric"><span>Bugs resolvidos</span><strong>14</strong></div>
-<div class="card metric"><span>Regras vivas</span><strong>10</strong></div>
-<div class="card metric"><span>Regressões</span><strong>4</strong></div>
+<div class="card metric"><span>Unit tests</span><strong>699/699</strong></div>
+<div class="card metric"><span>Playwright</span><strong>28/28</strong></div>
+<div class="card metric"><span>Skipped</span><strong>0</strong></div>
+<div class="card metric"><span>Blockers financeiros</span><strong>0</strong></div>
 <div class="card metric"><span>E2E financeiro</span><strong>£1,690</strong></div>
 </div>
-<div class="card warning"><b>⚠ Próximos blockers:</b> Calendar Unassigned explícito + Load Profile fallback + PDF footer smoke test.</div>
+<div class="card success"><b>✅ Fechamento da rodada:</b> cálculo/Invoice está em estado estável para regression final. Próxima fase: <b>regressão real → sweep independente em 3 modelos → AWS/Auth/Sync → Free ↔ Premium → release candidate iOS/Google Play</b>.</div>
 </section>
+
+<section id="recent"><div class="sectionhead"><h2>✅ Fechamento R2 — 11 Aug 2026</h2><p>Últimos slices que levaram a auditoria financeira ao estado fechado.</p></div>
+<div class="closuregrid">
+<article class="card closure"><span class="badge pass">R2.5</span><h3>Orphan calculator retired</h3><p><code>InvoiceCalculator.calculateInvoice()</code> saiu de produção e os testes foram redirecionados aos engines autoritativos.</p></article>
+<article class="card closure"><span class="badge pass">R2.6a</span><h3>Duplicate financial semantics</h3><p>Service/Employer deixaram de receber regras de fees específicas de Employee durante Duplicate/Corrected Copy.</p></article>
+<article class="card closure"><span class="badge pass">R2.6b/c</span><h3>Employer historical VAT + UBL</h3><p>Snapshots legados são preservados; edições financeiras ambíguas bloqueiam; UBL só exporta quando reconcilia.</p></article>
+<article class="card closure"><span class="badge pass">R2.7</span><h3>Service UBL authority</h3><p>Autoridade persistida é presence-aware; missing ≠ zero; valores malformados falham fechado.</p></article>
+<article class="card closure"><span class="badge pass">R2.8</span><h3>Legacy Service custom VAT</h3><p>17.5%/15% deixam de virar 20%; metadata save preserva ausência de <code>vatType</code> e dinheiro histórico.</p></article>
+<article class="card closure"><span class="badge pass">FINAL G</span><h3>Preview VAT-on-materials</h3><p>Service labour preview/PDF taxa apenas o net tributável; materials ficam no gross sem aumentar VAT.</p></article>
+<article class="card closure"><span class="badge pass">CASE E</span><h3>Calendar Unassigned</h3><p>Virou E2E real: 28/28 Playwright, 0 skipped, sem mudança de produção.</p></article>
+<article class="card closure"><span class="badge confirmed">CONSENSUS</span><h3>Independent reviews</h3><p>Gemini e GPT-5.6 Sol convergiram nos checkpoints finais; blockers encontrados foram corrigidos e revalidados.</p></article>
+</div></section>
 
 <section id="history"><div class="sectionhead"><h2>Master Stabilization History</h2><p>Bugs, regressões, decisões e dívida técnica encontrados durante a estabilização.</p></div><article class="card item">
       <div class="item-tags"><strong>BUG-001</strong><span class="badge bug">BUG</span><span class="badge high">HIGH</span><span class="badge resolved">resolved</span></div>
@@ -76,8 +88,8 @@
       <div class="item-tags"><strong>RULE-004</strong><span class="badge rule">RULE</span><span class="badge high">HIGH</span><span class="badge confirmed">confirmed</span></div>
       <div><h3>sourceShiftId é per-Invoice</h3><div class="muted">Invoice</div><p>A origem evita duplicidade na Invoice atual.</p><p><b>Estado / regra:</b> Outra Invoice pode reutilizar conscientemente o mesmo Shift.</p></div>
     </article><article class="card item">
-      <div class="item-tags"><strong>RULE-005</strong><span class="badge rule">RULE</span><span class="badge high">HIGH</span><span class="badge pending">pending</span></div>
-      <div><h3>Unassigned deve exigir ação explícita</h3><div class="muted">Calendar</div><p>Blank shift hoje pode acompanhar silenciosamente Itau/Santander/Nubank e alterar o total.</p><p><b>Estado / regra:</b> Calendar deve mostrar Unassigned como grupo próprio; escolher Profile nunca importa blank automaticamente.</p></div>
+      <div class="item-tags"><strong>RULE-005</strong><span class="badge rule">RULE</span><span class="badge high">HIGH</span><span class="badge confirmed">confirmed</span></div>
+      <div><h3>Unassigned é grupo explícito no Calendar</h3><div class="muted">Calendar</div><p>Shifts sem cliente ficam isolados de grupos nomeados/Profile.</p><p><b>Estado / regra:</b> Calendar mostra Unassigned como grupo próprio; single-Unassigned abre Invoice com client vazio e nunca inventa clientId.</p></div>
     </article><article class="card item">
       <div class="item-tags"><strong>RULE-006</strong><span class="badge rule">RULE</span><span class="badge medium">MEDIUM</span><span class="badge confirmed">confirmed</span></div>
       <div><h3>Blank pode continuar elegível dentro de Invoice já aberta</h3><div class="muted">Generate from Shifts</div><p>Aqui o usuário já escolheu conscientemente o cliente da Invoice.</p><p><b>Estado / regra:</b> Regra intencionalmente diferente do Calendar.</p></div>
@@ -108,47 +120,40 @@
     </article><article class="card item">
       <div class="item-tags"><strong>DEBT-001</strong><span class="badge tech-debt">TECH DEBT</span><span class="badge high">HIGH</span><span class="badge ready">ready</span></div>
       <div><h3>Super auditoria de qualidade</h3><div class="muted">Architecture</div><p>Após centenas de ajustes, precisamos provar que regras equivalentes não estão duplicadas/divergindo.</p><p><b>Estado / regra:</b> Auditoria independente: Claude Sonnet 5 + Gemini + ChatGPT; depois relatório de consenso.</p></div>
-    </article>
-<article class="card item"><div class="item-tags"><strong>BUG-019…024</strong><span class="badge bug">NEW QA</span><span class="badge high">HIGH/MEDIUM</span></div>
-<div><h3>Calendar identity/import + Load Profile state partitioning</h3><div class="muted">Latest stabilization cycle</div>
-<p>Calendar mixed-client import, sourceShiftId loss, Profile/manual grouping divergence, Cancel/CSP and Load Profile profile-store mismatch were investigated/fixed or queued.</p>
-<p><b>Estado:</b> Calendar identity core passed manual QA; Unassigned and Load Profile fallback remain final validation.</p></div></article>
-<article class="card item"><div class="item-tags"><strong>RULE-014</strong><span class="badge rule">RULE</span><span class="badge high">HIGH</span></div>
-<div><h3>Master Data vs Transaction Snapshot</h3><div class="muted">Architecture</div>
-<p>Live Profile/default changes must not rewrite historical Shift/Quote/Invoice/Expense values.</p><p><b>Estado:</b> promoted to architectural invariant for roadmap expansion.</p></div></article>
-</section>
+    </article></section>
 
-<section id="rules"><div class="sectionhead"><h2>Living Domain Specification</h2><p>As “regras malucas” que agora precisam sobreviver a qualquer refactor futuro.</p></div><div class="rulegrid"><article class="card rule"><div class="muted">RULE-001</div><h3>Profile ID é autoritativo</h3><p>clientId vence nome; manual só reconcilia por exact normalized match.</p></article><article class="card rule"><div class="muted">RULE-002</div><h3>Match manual nunca pode ser fuzzy</h3><p>Somente match exato após normalização.</p></article><article class="card rule"><div class="muted">RULE-003</div><h3>Ambiguidade não é resolvida silenciosamente</h3><p>Manual permanece separado; não escolher Profile arbitrariamente.</p></article><article class="card rule"><div class="muted">RULE-004</div><h3>sourceShiftId é per-Invoice</h3><p>Outra Invoice pode reutilizar conscientemente o mesmo Shift.</p></article><article class="card rule"><div class="muted">RULE-005</div><h3>Unassigned deve exigir ação explícita</h3><p>Calendar deve mostrar Unassigned como grupo próprio; escolher Profile nunca importa blank automaticamente.</p></article><article class="card rule"><div class="muted">RULE-006</div><h3>Blank pode continuar elegível dentro de Invoice já aberta</h3><p>Regra intencionalmente diferente do Calendar.</p></article><article class="card rule"><div class="muted">RULE-007</div><h3>Break desconta menor multiplier primeiro</h3><p>Manter ordem crescente de multiplier.</p></article><article class="card rule"><div class="muted">RULE-008</div><h3>Decimal hours só internamente</h3><p>UI/PDF exibem hora/minuto real.</p></article><article class="card rule"><div class="muted">RULE-009</div><h3>SERVICE substitui SITE/JOB quando representa serviço</h3><p>Usar SERVICE; Employee Invoice usa BASE RATE.</p></article><article class="card rule"><div class="muted">RULE-010</div><h3>Layout adapta densidade ao conteúdo</h3><p>comfortable/dense por contentWeight + proteção de page break.</p></article></div></section>
-
-
-<section id="northstar">
-<div class="sectionhead"><h2>🧭 Product North Star / Future Architecture Context</h2><p>Contexto de roadmap usado para avaliar se a arquitetura atual aguenta a próxima fase sem overengineering.</p></div>
-<div class="card audit">
-<h3>Direção do produto</h3>
-<p><b>Agenda</b> tende a virar o centro operacional conectando Clients, Jobs, Quotes, Invoices, Expenses/Receipts e Materials.</p>
-<h3>Fluxo futuro representativo</h3>
-<p><b>Job → Shopping List → Purchase → Expense → Invoice</b></p>
-<h3>Princípios que já devem influenciar a auditoria</h3>
-<ul>
-<li>Master Data e Transaction Snapshots precisam ser conceitos distintos.</li>
-<li>Mudar rate, overtime, VAT, endereço ou preço de material não deve reescrever documentos históricos.</li>
-<li>Identity/relationship rules não podem ser reinventadas módulo a módulo.</li>
-<li>Expenses tendem a alimentar Revenue, Profit, Tax Summary e Accountant Export.</li>
-<li>Uma entidade Job de primeira classe deve ser avaliada por sinais reais do código, não criada prematuramente.</li>
-<li>Second Brain/reminders futuros dependem de relacionamentos e histórico confiáveis.</li>
-</ul>
-</div>
-</section>
+<section id="rules"><div class="sectionhead"><h2>Living Domain Specification</h2><p>As “regras malucas” que agora precisam sobreviver a qualquer refactor futuro.</p></div><div class="rulegrid"><article class="card rule"><div class="muted">RULE-001</div><h3>Profile ID é autoritativo</h3><p>clientId vence nome; manual só reconcilia por exact normalized match.</p></article><article class="card rule"><div class="muted">RULE-002</div><h3>Match manual nunca pode ser fuzzy</h3><p>Somente match exato após normalização.</p></article><article class="card rule"><div class="muted">RULE-003</div><h3>Ambiguidade não é resolvida silenciosamente</h3><p>Manual permanece separado; não escolher Profile arbitrariamente.</p></article><article class="card rule"><div class="muted">RULE-004</div><h3>sourceShiftId é per-Invoice</h3><p>Outra Invoice pode reutilizar conscientemente o mesmo Shift.</p></article><article class="card rule"><div class="muted">RULE-005</div><h3>Unassigned é identidade de agrupamento</h3><p>Calendar separa blank shifts em grupo próprio; não persiste “Unassigned” como cliente nem cria clientId falso.</p></article><article class="card rule"><div class="muted">RULE-006</div><h3>Blank pode continuar elegível dentro de Invoice já aberta</h3><p>Regra intencionalmente diferente do Calendar.</p></article><article class="card rule"><div class="muted">RULE-007</div><h3>Break desconta menor multiplier primeiro</h3><p>Manter ordem crescente de multiplier.</p></article><article class="card rule"><div class="muted">RULE-008</div><h3>Decimal hours só internamente</h3><p>UI/PDF exibem hora/minuto real.</p></article><article class="card rule"><div class="muted">RULE-009</div><h3>SERVICE substitui SITE/JOB quando representa serviço</h3><p>Usar SERVICE; Employee Invoice usa BASE RATE.</p></article><article class="card rule"><div class="muted">RULE-010</div><h3>Layout adapta densidade ao conteúdo</h3><p>comfortable/dense por contentWeight + proteção de page break.</p></article></div></section>
 
 <section id="audit">
-<div class="sectionhead"><h2>🔎 Super Auditoria de Qualidade de Código</h2><p>Claude Sonnet 5 + Gemini + ChatGPT GPT-5.6 Sol • análises independentes → consenso.</p></div>
-<div class="card audit"><h3>Objetivo</h3><p>Não procurar UI bugs primeiro. Procurar duplicação de regra, acoplamento, divergência semântica, risco de regressão e dívida criada durante a estabilização.</p>
-<h3>Caso de estudo já comprovado</h3><p><b>Calendar grouping vs Invoice eligibility:</b> Profile “ab” + manual “ab” eram representados de formas diferentes em duas camadas. Uma dizia “duas identidades”; outra dizia “elegíveis juntos”. Esse é exatamente o padrão que a auditoria deve procurar no resto do sistema.</p>
-<h3>Escala</h3><p><b>P0</b> data/financial integrity • <b>P1</b> high regression risk • <b>P2</b> architectural debt • <b>P3</b> cleanup</p>
-<h3>Foco</h3><ul><li>Invoice client loading/default resolution vs Quote client loading/default resolution</li><li>Expense client linking vs Invoice/Quote identity semantics</li><li>Agenda/Calendar manual-name fallback</li><li>Calendar → Invoice vs Generate from Shifts</li><li>Quote → Invoice mapping and snapshot preservation</li><li>Rate/overtime defaults duplicated across modules</li><li>Financial calculation duplication / double-counting risk</li><li>Global State coupling and hidden mutations</li><li>DOM orchestration mixed with domain logic</li><li>Persistence/localStorage scattered across modules</li><li>Dead/superseded functions after recent fixes</li><li>Structural/regex tests that should be runtime tests</li></ul></div>
+<div class="sectionhead"><h2>🔎 Estado da auditoria</h2><p>Auditoria Invoice/Financial encerrada; próximos riscos de produção ficam fora desse domínio.</p></div>
+<div class="card audit"><h3>Consenso atual</h3><p><b>Financial / Invoice engine: CLOSED.</b> Os guards atuais preferem preservação histórica e fail-closed quando um documento não pode ser reconstruído de forma honesta.</p>
+<h3>Inventário original</h3><p><b>DONE:</b> overtime state/defaults, double counting, hourly rate por client, remoção dos overrides 1.5x/2x/3x, breakdown UI, live breakdown e Load Profile. <b>SUPERSEDED:</b> reprecificar rows existentes ao trocar cliente — snapshots históricos vencem.</p>
+<h3>P2 / backlog conhecido</h3><ul><li>Receipts no PDF: aguardar carregamento assíncrono antes de share/print e adicionar regressão de PDF.</li><li>PDF/share: limpar labels duplicados de Extra Charges/Extra Fees e incluir Expenses no texto de share.</li><li>Quote → Service: hardened mapping para mixed VAT / zero-hours e idempotência de conversão.</li><li>Employee legacy discount: UBL permanece bloqueado quando não há representação fiscal reconciliável.</li><li>Reduzir superfície pública de <code>buildUblModel()</code> e limpar specs históricas do calculator removido.</li></ul>
+<h3>Próximos Production Gates</h3><p><b>P0-A AWS/Auth/Sync</b> e <b>P0-B Free ↔ Premium/entitlements</b> passam a ser os principais riscos antes de App Store / Google Play.</p></div>
 </section>
 
-<section id="next"><div class="sectionhead"><h2>Próximos cenários</h2></div><article class="card next"><div><span class="badge next">NEXT</span></div><div><h3>Implementar/retestar grupo explícito Unassigned</h3><span class="muted">NEXT-01 • Calendar</span></div></article><article class="card next"><div><span class="badge pending">PENDING</span></div><div><h3>Retestar footer sem página órfã</h3><span class="muted">NEXT-02 • PDF</span></div></article><article class="card next"><div><span class="badge pending">PENDING</span></div><div><h3>Stress 15 rows / dense mode</h3><span class="muted">NEXT-03 • PDF</span></div></article><article class="card next"><div><span class="badge pending">PENDING</span></div><div><h3>Stress 30 rows / multi-page</h3><span class="muted">NEXT-04 • PDF</span></div></article><article class="card next"><div><span class="badge pending">PENDING</span></div><div><h3>Validar Expense standalone</h3><span class="muted">NEXT-05 • Expenses</span></div></article><article class="card next"><div><span class="badge pending">PENDING</span></div><div><h3>Linked Expenses, receipts e no-double-counting</h3><span class="muted">NEXT-06 • Invoice + Expenses</span></div></article><article class="card next"><div><span class="badge pending">PENDING</span></div><div><h3>Quote → Invoice E2E</h3><span class="muted">NEXT-07 • Quotes</span></div></article><article class="card next"><div><span class="badge ready">READY</span></div><div><h3>Super auditoria em 3 agentes + consenso</h3><span class="muted">NEXT-08 • Architecture</span></div></article><article class="card next"><div><span class="badge pending">PENDING</span></div><div><h3>Fixture determinístico de ~90 dias</h3><span class="muted">NEXT-09 • QA Infra</span></div></article></section>
+<section id="next"><div class="sectionhead"><h2>Próximos passos</h2><p>Sequência planejada para chegar ao release candidate sem reabrir a auditoria financeira.</p></div>
+<article class="card next"><div><span class="badge next">NEXT</span></div><div><h3>Regression pass de usuário real</h3><span class="muted">NEXT-01 • Employee complexo, Employer legado, Service custom VAT/materials, Calendar, Quote, Duplicate, PDF/UBL</span></div></article>
+<article class="card next"><div><span class="badge ready">READY</span></div><div><h3>Sweep final independente em 3 modelos</h3><span class="muted">NEXT-02 • Grok caça bugs/call paths • Gemini finanças/compatibilidade • Sol arquitetura/bypasses</span></div></article>
+<article class="card next"><div><span class="badge pending">P0-A</span></div><div><h3>AWS Production Readiness</h3><span class="muted">NEXT-03 • Cognito, Google/Apple, account linking, APIs, IAM, S3, sync, offline, isolation, restore</span></div></article>
+<article class="card next"><div><span class="badge pending">P0-B</span></div><div><h3>Free ↔ Premium / Entitlements</h3><span class="muted">NEXT-04 • purchase, restore, renew, cancel, expire, downgrade sem destruir dados, cross-device/platform</span></div></article>
+<article class="card next"><div><span class="badge pending">RELEASE</span></div><div><h3>iOS + Google Play release candidate</h3><span class="muted">NEXT-05 • TestFlight / Play testing com os Production Gates verdes</span></div></article>
+</section>
 </main>
-<footer>TempusMate QA Dashboard v4 • QA vivo + regras de domínio + release readiness</footer>
+<footer>TempusMate QA Dashboard v6 • Financial audit closed • Production gates next</footer>
+<script>
+(function(){
+  const root=document.documentElement;
+  const btn=document.getElementById('theme-toggle');
+  const saved=localStorage.getItem('tempusmateQaTheme');
+  const initial=saved || 'dark';
+  const apply=(theme)=>{
+    root.dataset.theme=theme;
+    localStorage.setItem('tempusmateQaTheme',theme);
+    if(btn){btn.textContent=theme==='dark'?'☀️ Claro':'🌙 Escuro';btn.setAttribute('aria-pressed', theme==='dark'?'true':'false');}
+  };
+  apply(initial);
+  btn?.addEventListener('click',()=>apply(root.dataset.theme==='dark'?'light':'dark'));
+})();
+</script>
 </body></html>
